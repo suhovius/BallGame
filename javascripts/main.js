@@ -7,22 +7,28 @@ window.onload = function init() {
 
 // GAME FRAMEWORK STARTS HERE
 var GF = function(){
-    // Vars relative to the canvas
-    var canvas, ctx, w, h;
+  // Vars relative to the canvas
+  var canvas, ctx, w, h;
 
-    // vars for counting frames/s, used by the measureFPS function
-    var frameCount = 0;
-    var lastTime;
-    var fpsContainer;
-    var fps;
-    // for time based animation
-    var delta, oldTime = 0;
+  // vars for counting frames/s, used by the measureFPS function
+  var frameCount = 0;
+  var lastTime;
+  var fpsContainer;
+  var fps;
+  // for time based animation
+  var delta, oldTime = 0;
 
-    // vars for handling inputs
-    var inputStates = {};
+  // vars for handling inputs
+  var inputStates = {};
 
-    // array of balls to animate
-    var ballArray = [];
+  // array of balls to animate
+  var ballArray = [];
+
+  var player = {
+    x:0,
+    y:0,
+    boundingCircleRadius: 5
+  };
 
   // We want the object to move at speed pixels/s (there are 60 frames in a second)
     // If we are really running at 60 frames/s, the delay between frames should be 1/60
@@ -33,151 +39,214 @@ var GF = function(){
     return (speed * delta) / 1000;
   };
 
-    var measureFPS = function(newTime){
+  var measureFPS = function(newTime){
 
-         // test for the very first invocation
-         if(lastTime === undefined) {
-           lastTime = newTime;
-           return;
-         }
+  // test for the very first invocation
+  if(lastTime === undefined) {
+    lastTime = newTime;
+    return;
+  }
 
-        //calculate the difference between last & current frame
-        var diffTime = newTime - lastTime;
+  //calculate the difference between last & current frame
+  var diffTime = newTime - lastTime;
 
-        if (diffTime >= 1000) {
-            fps = frameCount;
-            frameCount = 0;
-            lastTime = newTime;
-        }
+  if (diffTime >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastTime = newTime;
+  }
 
-        //and display it in an element we appended to the
-        // document in the start() function
-       fpsContainer.innerHTML = 'FPS: ' + fps;
-       frameCount++;
-    };
+    //and display it in an element we appended to the
+    // document in the start() function
+    fpsContainer.innerHTML = 'FPS: ' + fps;
+    frameCount++;
+  };
 
-     // clears the canvas content
-     function clearCanvas() {
-       ctx.clearRect(0, 0, w, h);
-     }
+   // clears the canvas content
+   function clearCanvas() {
+     ctx.clearRect(0, 0, w, h);
+   }
 
-    function updateBalls(delta) {
-        // Move and draw each ball, test collisions,
-        for (var i = 0; i < ballArray.length; i++) {
-            var ball = ballArray[i];
+  function circleCollide(x1, y1, r1, x2, y2, r2) {
+    var dx = x1 - x2;
+    var dy = y1 - y2;
+    return ((dx * dx + dy * dy) < (r1 + r2)*(r1+r2));
+  }
 
-            // 1) move the ball
-            ball.move();
+  function updateBalls(delta) {
+    // Move and draw each ball, test collisions,
+    for (var i = 0; i < ballArray.length; i++) {
+      var ball = ballArray[i];
 
-            // 2) test if the ball collides with a wall
-            testCollisionWithWalls(ball);
+      // 1) move the ball
+      ball.move();
 
-            // 3) draw the ball
-            ball.draw();
-        }
+      // 2) test if the ball collides with a wall
+      testCollisionWithWalls(ball);
+
+      // 3) draw the ball
+      ball.draw();
+    }
+  }
+
+  function updatePlayer() {
+    // The player is just a circle, drawn at the mouse position
+    // Just to test circle/circle collision.
+
+    if(inputStates.mousePos) {
+      player.x = inputStates.mousePos.x;
+      player.y = inputStates.mousePos.y;
+
+       // draws a circle
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.boundingCircleRadius, 0, 2*Math.PI);
+      ctx.stroke();
     }
 
-    function testCollisionWithWalls(ball) {
-        // left
-        if (ball.x < ball.radius) {
-            ball.x = ball.radius;
-            ball.angle = -ball.angle + Math.PI;
+    // if(inputStates.mouseDownPos) {
+    //   ctx.save();
+    //   ctx.beginPath();
+    //   ctx.strokeStyle = 'LightGreen';
+    //   ctx.lineWidth = 3;
+    //   ctx.moveTo(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y);
+    //   ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
+    //   ctx.stroke();
+    //   ctx.restore();
+    // }
+  }
+
+  function checkBallControllable() {
+    for (var i = 0; i < ballArray.length; i++) {
+        var ball = ballArray[i];
+
+        if(circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+          ball.drawSelection();
+          ctx.fillText("Collision", 150, 20);
+          ctx.strokeStyle = ctx.fillStyle = 'red';
+
+        } else {
+          ctx.fillText("No collision", 150, 20);
+          ctx.strokeStyle = ctx.fillStyle = 'black';
         }
-        // right
-        if (ball.x > w - (ball.radius)) {
-            ball.x = w - (ball.radius);
-            ball.angle = -ball.angle + Math.PI;
-        }
-        // up
-        if (ball.y < ball.radius) {
-            ball.y = ball.radius;
-            ball.angle = -ball.angle;
-        }
-        // down
-        if (ball.y > h - (ball.radius)) {
-            ball.y = h - (ball.radius);
-            ball.angle = -ball.angle;
-        }
-    }
 
-    function createMainBall() {
-      ballArray = [];
-      var ball = new Ball(w,
-                    h,
-                    Math.PI / 2,
-                    (0),
-                    15);
+        if (ball.isInLaunchPosition() && inputStates.mouseDownPos && circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+          ball.drawSelection();
 
-
-            ballArray[0] = ball;
-    }
-
-    function createBalls(numberOfBalls) {
-        // Start from an empty array
-        ballArray = [];
-
-        for (var i = 0; i < numberOfBalls; i++) {
-            // Create a ball with random position and speed.
-            // You can change the radius
-            var ball = new Ball(w * Math.random(),
-                    h * Math.random(),
-                    (2 * Math.PI) * Math.random(),
-                    (100),
-                    15);
-
-
-            ballArray[i] = ball;
-
-        }
-    }
-
-// constructor function for balls
-    function Ball(x, y, angle, v, diameter) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-        this.v = v;
-        this.radius = diameter / 2;
-        this.color = 'DarkOrange';
-
-        this.draw = function () {
+          if(inputStates.mousedown) {
             ctx.save();
             ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-            ctx.fill();
+            ctx.strokeStyle = 'LightGreen';
+            ctx.lineWidth = 3;
+            ctx.moveTo(ball.x, ball.y);
+            ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
+            ctx.stroke();
             ctx.restore();
-            this.drawSelection();
-        };
+          }
+        }
 
-        this.drawSelection = function() {
+    }
+  }
+
+  function testCollisionWithWalls(ball) {
+      // left
+      if (ball.x < ball.radius) {
+          ball.x = ball.radius;
+          ball.angle = -ball.angle + Math.PI;
+      }
+      // right
+      if (ball.x > w - (ball.radius)) {
+          ball.x = w - (ball.radius);
+          ball.angle = -ball.angle + Math.PI;
+      }
+      // up
+      if (ball.y < ball.radius) {
+          ball.y = ball.radius;
+          ball.angle = -ball.angle;
+      }
+      // down
+      if (ball.y > h - (ball.radius)) {
+          ball.y = h - (ball.radius);
+          ball.angle = -ball.angle;
+      }
+  }
+
+  function createMainBall() {
+    ballArray = [];
+    var ball = new Ball(w/2,
+                  h/2,
+                  Math.PI / 2,
+                  (0),
+                  15);
+
+
+    ballArray[0] = ball;
+  }
+
+  function createBalls(numberOfBalls) {
+      // Start from an empty array
+      ballArray = [];
+
+      for (var i = 0; i < numberOfBalls; i++) {
+          // Create a ball with random position and speed.
+          // You can change the radius
+          var ball = new Ball(w * Math.random(),
+                  h * Math.random(),
+                  (2 * Math.PI) * Math.random(),
+                  (100),
+                  15);
+
+
+          ballArray[i] = ball;
+
+      }
+  }
+
+// constructor function for balls
+  function Ball(x, y, angle, v, diameter) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.v = v;
+      this.radius = diameter / 2;
+      this.color = 'DarkOrange';
+
+      this.draw = function () {
           ctx.save();
           ctx.beginPath();
-          if (this.isInLaunchPosition()) {
-              ctx.beginPath();
-              ctx.strokeStyle = 'LightGreen';
-              ctx.lineWidth=3;
-                ctx.arc(this.x, this.y, this.radius + 5, 0, 2 * Math.PI);
-              ctx.stroke();
-            };
+          ctx.fillStyle = this.color;
+          ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+          ctx.fill();
           ctx.restore();
-        };
+      };
 
-        this.move = function () {
-            // add horizontal increment to the x pos
-            // add vertical increment to the y pos
+      this.drawSelection = function() {
+        ctx.save();
+        ctx.beginPath();
+        if (this.isInLaunchPosition()) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'LightGreen';
+            ctx.lineWidth=3;
+              ctx.arc(this.x, this.y, this.radius + 3, 0, 2 * Math.PI);
+            ctx.stroke();
+          };
+        ctx.restore();
+      };
 
-            var incX = this.v * Math.cos(this.angle);
-            var incY = this.v * Math.sin(this.angle);
+      this.move = function () {
+          // add horizontal increment to the x pos
+          // add vertical increment to the y pos
 
-            this.x += calcDistanceToMove(delta, incX);
-            this.y += calcDistanceToMove(delta, incY);
-        };
+          var incX = this.v * Math.cos(this.angle);
+          var incY = this.v * Math.sin(this.angle);
 
-        this.isInLaunchPosition = function() {
-          return this.v == 0
-        }
-    }
+          this.x += calcDistanceToMove(delta, incX);
+          this.y += calcDistanceToMove(delta, incY);
+      };
+
+      this.isInLaunchPosition = function() {
+        return (this.v == 0);
+      }
+  }
 
   function timer(currentTime) {
     var delta = currentTime - oldTime;
@@ -185,104 +254,112 @@ var GF = function(){
     return delta;
 
   }
-    var mainLoop = function(time){
-        //main function, called each frame
-        measureFPS(time);
 
-        // number of ms since last frame draw
-        delta = timer(time);
+  var mainLoop = function(time){
+      //main function, called each frame
+      measureFPS(time);
 
-        // Clear the canvas
-        clearCanvas();
+      // number of ms since last frame draw
+      delta = timer(time);
 
-        // Update balls positions
-        updateBalls(delta);
+      // Clear the canvas
+      clearCanvas();
 
-        // call the animation loop every 1/60th of second
-        requestAnimationFrame(mainLoop);
-    };
+      // Update balls positions
+      updateBalls(delta);
 
+      updatePlayer();
 
-    function getMousePos(evt) {
-        // necessary to take into account CSS boudaries
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
-        };
-    }
+      checkBallControllable();
 
-
-    var start = function(){
-        // adds a div for displaying the fps value
-        fpsContainer = document.createElement('div');
-        document.body.appendChild(fpsContainer);
-
-        // Canvas, context etc.
-        canvas = document.querySelector("#myCanvas");
-
-        // often useful
-        w = canvas.width;
-        h = canvas.height;
-
-        // important, we will draw with this object
-        ctx = canvas.getContext('2d');
-        // default police for text
-        ctx.font="20px Arial";
-
-       //add the listener to the main, window object, and update the states
-      window.addEventListener('keydown', function(event){
-          if (event.keyCode === 37) {
-             inputStates.left = true;
-          } else if (event.keyCode === 38) {
-             inputStates.up = true;
-          } else if (event.keyCode === 39) {
-             inputStates.right = true;
-          } else if (event.keyCode === 40) {
-             inputStates.down = true;
-          }  else if (event.keyCode === 32) {
-             inputStates.space = true;
-          }
-      }, false);
-
-      //if the key will be released, change the states object
-      window.addEventListener('keyup', function(event){
-          if (event.keyCode === 37) {
-             inputStates.left = false;
-          } else if (event.keyCode === 38) {
-             inputStates.up = false;
-          } else if (event.keyCode === 39) {
-             inputStates.right = false;
-          } else if (event.keyCode === 40) {
-             inputStates.down = false;
-          } else if (event.keyCode === 32) {
-             inputStates.space = false;
-          }
-      }, false);
-
-      // Mouse event listeners
-      canvas.addEventListener('mousemove', function (evt) {
-          inputStates.mousePos = getMousePos(evt);
-      }, false);
-
-      canvas.addEventListener('mousedown', function (evt) {
-            inputStates.mousedown = true;
-            inputStates.mouseButton = evt.button;
-      }, false);
-
-      canvas.addEventListener('mouseup', function (evt) {
-          inputStates.mousedown = false;
-      }, false);
-
-
-      createMainBall();
-
+      // call the animation loop every 1/60th of second
       requestAnimationFrame(mainLoop);
+  };
 
-    };
 
-    //our GameFramework returns a public API visible from outside its scope
-    return {
-        start: start
-    };
+  function getMousePos(evt) {
+      // necessary to take into account CSS boudaries
+      var rect = canvas.getBoundingClientRect();
+      return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+      };
+  }
+
+
+  var start = function(){
+      // adds a div for displaying the fps value
+      fpsContainer = document.createElement('div');
+      document.body.appendChild(fpsContainer);
+
+      // Canvas, context etc.
+      canvas = document.querySelector("#myCanvas");
+
+      // often useful
+      w = canvas.width;
+      h = canvas.height;
+
+      // important, we will draw with this object
+      ctx = canvas.getContext('2d');
+      // default police for text
+      ctx.font="20px Arial";
+
+    // TODO: Use this later
+     //add the listener to the main, window object, and update the states
+    // window.addEventListener('keydown', function(event){
+    //     if (event.keyCode === 37) {
+    //        inputStates.left = true;
+    //     } else if (event.keyCode === 38) {
+    //        inputStates.up = true;
+    //     } else if (event.keyCode === 39) {
+    //        inputStates.right = true;
+    //     } else if (event.keyCode === 40) {
+    //        inputStates.down = true;
+    //     }  else if (event.keyCode === 32) {
+    //        inputStates.space = true;
+    //     }
+    // }, false);
+
+    //if the key will be released, change the states object
+    window.addEventListener('keyup', function(event){
+        if (event.keyCode === 37) {
+           inputStates.left = false;
+        } else if (event.keyCode === 38) {
+           inputStates.up = false;
+        } else if (event.keyCode === 39) {
+           inputStates.right = false;
+        } else if (event.keyCode === 40) {
+           inputStates.down = false;
+        } else if (event.keyCode === 32) {
+           inputStates.space = false;
+        }
+    }, false);
+
+    // Mouse event listeners
+    canvas.addEventListener('mousemove', function (evt) {
+        inputStates.mousePos = getMousePos(evt);
+    }, false);
+
+    canvas.addEventListener('mousedown', function (evt) {
+          inputStates.mousedown = true;
+          inputStates.mouseButton = evt.button;
+          inputStates.mouseDownPos = getMousePos(evt);
+    }, false);
+
+    canvas.addEventListener('mouseup', function (evt) {
+        inputStates.mousedown = false;
+        inputStates.mouseDownPos = null; // clean mouse down position
+    }, false);
+
+
+    createMainBall();
+
+    requestAnimationFrame(mainLoop);
+
+  };
+
+  //our GameFramework returns a public API visible from outside its scope
+  return {
+      start: start
+  };
 };
