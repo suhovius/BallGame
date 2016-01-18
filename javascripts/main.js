@@ -30,6 +30,8 @@ var GF = function(){
     boundingCircleRadius: 5
   };
 
+  var currentBallParams = {};
+
   // We want the object to move at speed pixels/s (there are 60 frames in a second)
     // If we are really running at 60 frames/s, the delay between frames should be 1/60
     // = 16.66 ms, so the number of pixels to move = (speed * del)/1000. If the delay is twice
@@ -115,6 +117,19 @@ var GF = function(){
     // }
   }
 
+  function distanceBettweenToPoints(x1, y1, x2, y2) {
+    return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
+  }
+
+  function angleBetween2Lines(x1, y1, x2, y2, x3, y3, x4, y4) {
+    var dx1 = x2-x1, dy1 = y2-y1, dx2 = x4-x3, dy2 = y4-y3;
+
+    var d = dx1*dx2 + dy1*dy2;   // dot product of the 2 vectors
+    var l2 = (dx1*dx1+dy1*dy1)*(dx2*dx2+dy2*dy2); // product of the squared lengths
+
+    return Math.acos(d/Math.sqrt(l2));
+  }
+
   function checkBallControllable() {
     for (var i = 0; i < ballArray.length; i++) {
         var ball = ballArray[i];
@@ -140,8 +155,45 @@ var GF = function(){
             ctx.moveTo(ball.x, ball.y);
             ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
             ctx.stroke();
+            ctx.beginPath();
+            ctx.strokeStyle = 'BlueViolet';
+            ctx.fillStyle = 'BlueViolet';
+            ctx.moveTo(ball.x, 0);
+            ctx.lineTo(ball.x, h);
+            ctx.stroke();
+            ctx.moveTo(0, ball.y);
+            ctx.lineTo(w, ball.y);
+            ctx.stroke();
+            ctx.fillText("0", w-25, ball.y+25);
+            ctx.fillText("90", ball.x-30, h-25);
+            ctx.fillText("180", 25, ball.y-25);
+            ctx.fillText("360", ball.x+25, 50);
+            ctx.fillStyle = 'Black';
+
+            ctx.beginPath();
+            ctx.strokeStyle = 'Red';
+            ctx.moveTo(ball.x, ball.y);
+            ctx.lineTo(ball.x + 25, ball.y);
+            ctx.stroke();
+
+            var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
+
+            ctx.fillText("Angle " + angle  * (180/ Math.PI), 50, 150)
+
+            currentBallParams = {
+              angle: Math.PI + angle,
+              v: distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y),
+              isSet: true
+            };
             ctx.restore();
           }
+        }
+
+        if (currentBallParams.isSet && !inputStates.mousedown) {
+          console.log("Mouse Up");
+          ball.angle  = currentBallParams.angle;
+          ball.v = currentBallParams.v;
+          currentBallParams.isSet = false;
         }
 
     }
@@ -174,7 +226,7 @@ var GF = function(){
     ballArray = [];
     var ball = new Ball(w/2,
                   h/2,
-                  Math.PI / 2,
+                  Math.PI,
                   (0),
                   15);
 
@@ -241,6 +293,13 @@ var GF = function(){
 
           this.x += calcDistanceToMove(delta, incX);
           this.y += calcDistanceToMove(delta, incY);
+
+          if (this.v > 0) {
+            this.v -= 0.5; // Decrease speec
+          } else {
+            this.v = 0;
+          }
+
       };
 
       this.isInLaunchPosition = function() {
