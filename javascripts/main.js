@@ -62,7 +62,7 @@ var GF = function(){
     telemetryContainer.innerHTML += '<br/>Current Speed: ' + ball.currentVelocity();
     telemetryContainer.innerHTML += '<br/>Current Angle: ' + ball.currentAngle() * (180/ Math.PI);
     telemetryContainer.innerHTML += '<br/>Coordiates: X = ' + ball.x + " Y = " + ball.y;
-    telemetryContainer.innerHTML += '<br/>Hit angle: ' + ball.hitAngle * (180/ Math.PI);
+    telemetryContainer.innerHTML += '<br/>Hit angle: ' + ball.hitAngle * (180/ Math.PI) + ' Positive: ' + (ball.hitAngle > 0 ? ball.hitAngle : ball.hitAngle + 2*Math.PI) * (180/ Math.PI);
     telemetryContainer.innerHTML += '<br/>Hit velocity: ' + ball.hitVelocity;
     telemetryContainer.innerHTML += '<br/>vX: ' + ball.vX();
     telemetryContainer.innerHTML += '<br/>vY: ' + ball.vY();
@@ -157,6 +157,31 @@ var GF = function(){
     return Math.acos(d/Math.sqrt(l2));
   }
 
+  function drawAxis(x, y, theta, r) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = 'Orange';
+    ctx.fillStyle = 'Orange';
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+    ctx.fillText("0", w-25, y+25);
+    ctx.fillText("90", x-30, h-25);
+    ctx.fillText("180", 25, y-25);
+    ctx.fillText("270", x+25, 50);
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'Red';
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
   function checkBallControllable() {
     for (var i = 0; i < ballArray.length; i++) {
         var ball = ballArray[i];
@@ -194,7 +219,7 @@ var GF = function(){
             ctx.fillText("0", w-25, ball.y+25);
             ctx.fillText("90", ball.x-30, h-25);
             ctx.fillText("180", 25, ball.y-25);
-            ctx.fillText("360", ball.x+25, 50);
+            ctx.fillText("270", ball.x+25, 50);
             ctx.fillStyle = 'Black';
 
             ctx.beginPath();
@@ -360,6 +385,7 @@ var GF = function(){
         // So, means ball could glide both by x and y coodinates
         // There are two situations gliding (rolling) and hit.
         // Each one depends on angle and hit side
+        // means that hide side and ball direction are near to parallel position
         if (Math.abs(this.vY()) > Math.abs(this.vX())) {
           this.v = this.currentVelocity() - vYCollisionReduction;
         } else {
@@ -399,6 +425,10 @@ var GF = function(){
       updatePlayer();
 
       checkBallControllable();
+
+
+      drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
+      drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
 
       updateTelemetry(ballArray[0]);
 
