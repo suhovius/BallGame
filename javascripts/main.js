@@ -59,8 +59,8 @@ var GF = function(){
     telemetryContainer.innerHTML = "";
     telemetryContainer.innerHTML += '<br/>Initial Speed: ' + ball.v;
     telemetryContainer.innerHTML += '<br/>Initial Angle: ' + ball.angle * (180/ Math.PI);
-    telemetryContainer.innerHTML += '<br/>Cureent Speed: ' + ball.currentVelocity();
-    telemetryContainer.innerHTML += '<br/>Cureent Angle: ' + ball.currentAngle() * (180/ Math.PI);
+    telemetryContainer.innerHTML += '<br/>Current Speed: ' + ball.currentVelocity();
+    telemetryContainer.innerHTML += '<br/>Current Angle: ' + ball.currentAngle() * (180/ Math.PI);
     telemetryContainer.innerHTML += '<br/>Coordiates: X = ' + ball.x + " Y = " + ball.y;
     telemetryContainer.innerHTML += '<br/>Hit angle: ' + ball.hitAngle * (180/ Math.PI);
     telemetryContainer.innerHTML += '<br/>Hit velocity: ' + ball.hitVelocity;
@@ -356,6 +356,10 @@ var GF = function(){
         this.angle = this.currentAngle();
         this.hitAngle = this.angle;
         this.hitVelocity = this.v;
+        // You should use ball's hit side and angle to this side.
+        // So, means ball could glide both by x and y coodinates
+        // There are two situations gliding (rolling) and hit.
+        // Each one depends on angle and hit side
         if (Math.abs(this.vY()) > Math.abs(this.vX())) {
           this.v = this.currentVelocity() - vYCollisionReduction;
         } else {
