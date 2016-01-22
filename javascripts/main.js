@@ -14,6 +14,7 @@ var GF = function(){
   var frameCount = 0;
   var lastTime;
   var fpsContainer;
+  var telemetryContainer;
   var fps;
   // for time based animation
   var delta, oldTime = 0;
@@ -30,33 +31,59 @@ var GF = function(){
     boundingCircleRadius: 5
   };
 
+// Gravity
+// 9.8 m/s2
+// We use ms as time
+// Suppose that 1 px is 1 mm than
+// 1 m = 1000 mm
+// 9.8 * 1000 mm / (1000 ms * 1000 ms)
+// 9.8 * 1000 / ( 1000 * 1000 ) =0.0098 px/ms2
+  var gravityAcceleration = 0.098;
+
   var currentBallParams = {};
+
+  var msToSeconds = function(timeMs) {
+    return timeMs / 1000;
+  }
 
   // We want the object to move at speed pixels/s (there are 60 frames in a second)
     // If we are really running at 60 frames/s, the delay between frames should be 1/60
     // = 16.66 ms, so the number of pixels to move = (speed * del)/1000. If the delay is twice
-    // longer, the formula works : let's move the rectangle twice longer!
+    // longer, the formula works
   var calcDistanceToMove = function(delta, speed) {
     //console.log("#delta = " + delta + " speed = " + speed);
     return (speed * delta) / 1000;
   };
 
+  var updateTelemetry = function (ball) {
+    telemetryContainer.innerHTML = "";
+    telemetryContainer.innerHTML += '<br/>Initial Speed: ' + ball.v;
+    telemetryContainer.innerHTML += '<br/>Initial Angle: ' + ball.angle * (180/ Math.PI);
+    telemetryContainer.innerHTML += '<br/>Cureent Speed: ' + ball.currentVelocity();
+    telemetryContainer.innerHTML += '<br/>Cureent Angle: ' + ball.currentAngle() * (180/ Math.PI);
+    telemetryContainer.innerHTML += '<br/>Coordiates: X = ' + ball.x + " Y = " + ball.y;
+    telemetryContainer.innerHTML += '<br/>Hit angle: ' + ball.hitAngle * (180/ Math.PI);
+    telemetryContainer.innerHTML += '<br/>Hit velocity: ' + ball.hitVelocity;
+    telemetryContainer.innerHTML += '<br/>vX: ' + ball.vX();
+    telemetryContainer.innerHTML += '<br/>vY: ' + ball.vY();
+  }
+
   var measureFPS = function(newTime){
 
-  // test for the very first invocation
-  if(lastTime === undefined) {
-    lastTime = newTime;
-    return;
-  }
+    // test for the very first invocation
+    if(lastTime === undefined) {
+      lastTime = newTime;
+      return;
+    }
 
-  //calculate the difference between last & current frame
-  var diffTime = newTime - lastTime;
+    //calculate the difference between last & current frame
+    var diffTime = newTime - lastTime;
 
-  if (diffTime >= 1000) {
-    fps = frameCount;
-    frameCount = 0;
-    lastTime = newTime;
-  }
+    if (diffTime >= 1000) {
+      fps = frameCount;
+      frameCount = 0;
+      lastTime = newTime;
+    }
 
     //and display it in an element we appended to the
     // document in the start() function
@@ -190,7 +217,6 @@ var GF = function(){
         }
 
         if (currentBallParams.isSet && !inputStates.mousedown) {
-          console.log("Mouse Up");
           ball.angle  = currentBallParams.angle;
           ball.v = currentBallParams.v;
           currentBallParams.isSet = false;
@@ -203,21 +229,26 @@ var GF = function(){
       // left
       if (ball.x < ball.radius) {
           ball.x = ball.radius;
+          ball.collisionReset(); // set current values like speed, angle, and reset run time to zero
           ball.angle = -ball.angle + Math.PI;
+
       }
       // right
       if (ball.x > w - (ball.radius)) {
           ball.x = w - (ball.radius);
+          ball.collisionReset();
           ball.angle = -ball.angle + Math.PI;
       }
       // up
       if (ball.y < ball.radius) {
           ball.y = ball.radius;
+          ball.collisionReset();
           ball.angle = -ball.angle;
       }
       // down
       if (ball.y > h - (ball.radius)) {
           ball.y = h - (ball.radius);
+          ball.collisionReset();
           ball.angle = -ball.angle;
       }
   }
@@ -226,10 +257,9 @@ var GF = function(){
     ballArray = [];
     var ball = new Ball(w/2,
                   h/2,
-                  Math.PI,
-                  (0),
+                  Math.PI/2,
+                  (1),
                   15);
-
 
     ballArray[0] = ball;
   }
@@ -261,6 +291,9 @@ var GF = function(){
       this.v = v;
       this.radius = diameter / 2;
       this.color = 'DarkOrange';
+      this.runTime = 0;
+      this.hitVelocity = 0;
+      this.hitAngle = 0;
 
       this.draw = function () {
           ctx.save();
@@ -271,7 +304,7 @@ var GF = function(){
           ctx.restore();
       };
 
-      this.drawSelection = function() {
+      this.drawSelection = function () {
         ctx.save();
         ctx.beginPath();
         if (this.isInLaunchPosition()) {
@@ -284,23 +317,55 @@ var GF = function(){
         ctx.restore();
       };
 
+      this.vX = function () {
+        return this.v * Math.cos(this.angle);
+      }
+
+      this.vY = function () {
+        return this.v * Math.sin(this.angle) + (gravityAcceleration * this.runTime);
+      }
+
+      this.currentVelocity = function () {
+        return Math.sqrt(this.vX()*this.vX() + this.vY()*this.vY());
+      }
+
+      this.currentAngle = function () {
+        var value = Math.atan2(this.vY(), this.vX());
+        return isNaN(value) ? 0 : value;
+      }
+
       this.move = function () {
           // add horizontal increment to the x pos
           // add vertical increment to the y pos
 
-          var incX = this.v * Math.cos(this.angle);
-          var incY = this.v * Math.sin(this.angle);
+          this.runTime += delta;
 
-          this.x += calcDistanceToMove(delta, incX);
-          this.y += calcDistanceToMove(delta, incY);
+          var incX = this.vX();
+          var incY = this.vY();
 
-          if (this.v > 0) {
-            this.v -= 0.5; // Decrease speec
-          } else {
-            this.v = 0;
-          }
+         this.x += calcDistanceToMove(delta, incX);
+         this.y += calcDistanceToMove(delta, incY);
 
       };
+
+      this.collisionReset = function () {
+        var vXCollisionReduction = 1; // ball rolls, velocity reduction factor per collision
+        var vYCollisionReduction = 30; // ball hits velocity reduction factor per collision
+
+        this.runTime = 0;
+        this.angle = this.currentAngle();
+        this.hitAngle = this.angle;
+        this.hitVelocity = this.v;
+        if (Math.abs(this.vY()) > Math.abs(this.vX())) {
+          this.v = this.currentVelocity() - vYCollisionReduction;
+        } else {
+          this.v = this.currentVelocity() - vXCollisionReduction;
+        }
+
+        if (this.v < 0) {
+          this.v = 0;
+        }
+      }
 
       this.isInLaunchPosition = function() {
         return (this.v == 0);
@@ -331,6 +396,8 @@ var GF = function(){
 
       checkBallControllable();
 
+      updateTelemetry(ballArray[0]);
+
       // call the animation loop every 1/60th of second
       requestAnimationFrame(mainLoop);
   };
@@ -350,6 +417,9 @@ var GF = function(){
       // adds a div for displaying the fps value
       fpsContainer = document.createElement('div');
       document.body.appendChild(fpsContainer);
+
+      telemetryContainer = document.createElement('div');
+      document.body.appendChild(telemetryContainer);
 
       // Canvas, context etc.
       canvas = document.querySelector("#myCanvas");
