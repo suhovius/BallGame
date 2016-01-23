@@ -66,6 +66,14 @@ var GF = function(){
     telemetryContainer.innerHTML += '<br/>Hit velocity: ' + ball.hitVelocity;
     telemetryContainer.innerHTML += '<br/>vX: ' + ball.vX();
     telemetryContainer.innerHTML += '<br/>vY: ' + ball.vY();
+
+    // var anglesStr = "";
+    // for(var i =0; i <= ball.hits.length - 1; i++ ) {
+    //   if (true) {
+    //     anglesStr += (Math.round(ball.hits[i].angleBetween * (180/ Math.PI)) + ' ');
+    //   }
+    // }
+    // telemetryContainer.innerHTML += ('<br/> Hit angles: ' + anglesStr);
   }
 
   var measureFPS = function(newTime){
@@ -230,7 +238,7 @@ var GF = function(){
 
             var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
 
-            ctx.fillText("Angle " + angle  * (180/ Math.PI), 50, 150)
+            ctx.fillText("Angle " + (2*Math.PI - angle)  * (180/ Math.PI), 50, 150)
 
             currentBallParams = {
               angle: Math.PI + angle,
@@ -254,26 +262,26 @@ var GF = function(){
       // left
       if (ball.x < ball.radius) {
           ball.x = ball.radius;
-          ball.collisionReset(); // set current values like speed, angle, and reset run time to zero
+          ball.collisionReset(Math.PI/2); // set current values like speed, angle, and reset run time to zero
           ball.angle = -ball.angle + Math.PI;
 
       }
       // right
       if (ball.x > w - (ball.radius)) {
           ball.x = w - (ball.radius);
-          ball.collisionReset();
+          ball.collisionReset(Math.PI/2);
           ball.angle = -ball.angle + Math.PI;
       }
       // up
       if (ball.y < ball.radius) {
           ball.y = ball.radius;
-          ball.collisionReset();
+          ball.collisionReset(Math.PI);
           ball.angle = -ball.angle;
       }
       // down
       if (ball.y > h - (ball.radius)) {
           ball.y = h - (ball.radius);
-          ball.collisionReset();
+          ball.collisionReset(Math.PI);
           ball.angle = -ball.angle;
       }
   }
@@ -308,6 +316,23 @@ var GF = function(){
       }
   }
 
+  function drawCollisionAngles(ball) {
+    ctx.save();
+    for (var i = 0; i < ball.hits.length - 1; i++) {
+        var hit = ball.hits[i];
+        if (true) {
+          ctx.beginPath();
+          ctx.strokeStyle = 'LightGreen';
+          ctx.lineWidth=2;
+          ctx.fillText((Math.round(hit.angleBetween * (180/ Math.PI))), (hit.x +w/2) /2, (hit.y +h/2)/2 );
+          ctx.moveTo(hit.x, hit.y);
+          ctx.lineTo(w/2, h/2);
+          ctx.stroke();
+        }
+    }
+    ctx.restore();
+  }
+
 // constructor function for balls
   function Ball(x, y, angle, v, diameter) {
       this.x = x;
@@ -319,6 +344,7 @@ var GF = function(){
       this.runTime = 0;
       this.hitVelocity = 0;
       this.hitAngle = 0;
+      this.hits = [];
 
       this.draw = function () {
           ctx.save();
@@ -373,24 +399,33 @@ var GF = function(){
 
       };
 
-      this.collisionReset = function () {
-        var vXCollisionReduction = 1; // ball rolls, velocity reduction factor per collision
-        var vYCollisionReduction = 30; // ball hits velocity reduction factor per collision
+      this.collisionReset = function (surfaceAngle) {
+        var frictionReduction = 1; // ball rolls, velocity reduction factor per collision
+        var speedCollisionReduction = 50; // ball hits velocity reduction factor per collision
 
         this.runTime = 0;
         this.angle = this.currentAngle();
         this.hitAngle = this.angle;
         this.hitVelocity = this.v;
+
+        var smallestAngle = Math.abs(Math.atan2(Math.sin(surfaceAngle-this.hitAngle), Math.cos(surfaceAngle-this.hitAngle)));
+        smallestAngle = (smallestAngle > (Math.PI / 2) ? Math.abs(Math.PI - smallestAngle) : smallestAngle);
+
+        this.hits.push({
+          angleBetween: smallestAngle,
+          angle: this.hitAngle,
+          x: this.x,
+          y: this.y
+        });
+
         // You should use ball's hit side and angle to this side.
         // So, means ball could glide both by x and y coodinates
         // There are two situations gliding (rolling) and hit.
         // Each one depends on angle and hit side
-        // means that hide side and ball direction are near to parallel position
-        if (Math.abs(this.vY()) > Math.abs(this.vX())) {
-          this.v = this.currentVelocity() - vYCollisionReduction;
-        } else {
-          this.v = this.currentVelocity() - vXCollisionReduction;
-        }
+        // x = smallestAngle / (Math.PI / 2)
+
+        this.v = this.currentVelocity() - ((2 * smallestAngle) / Math.PI) * speedCollisionReduction - frictionReduction;
+
 
         if (this.v < 0) {
           this.v = 0;
@@ -428,9 +463,10 @@ var GF = function(){
 
 
       drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
-      drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
+      //drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
 
       updateTelemetry(ballArray[0]);
+    //  drawCollisionAngles(ballArray[0]);
 
       // call the animation loop every 1/60th of second
       requestAnimationFrame(mainLoop);
