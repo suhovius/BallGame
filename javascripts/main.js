@@ -425,7 +425,7 @@ var GF = function(){
       };
 
       this.collisionReset = function (surfaceAngle) {
-        var frictionReduction = 1; // ball rolls, velocity reduction factor per collision
+        var frictionReduction = 0.01; // ball rolls, velocity reduction factor per collision
         var speedCollisionReduction = 50; // ball hits velocity reduction factor per collision
 
         this.runTime = 0;
@@ -489,7 +489,7 @@ var GF = function(){
       checkBallControllable();
 
 
-      drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
+      //drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
       //drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
 
       updateTelemetry(ballArray[0]);
