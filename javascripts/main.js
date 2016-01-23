@@ -31,6 +31,8 @@ var GF = function(){
     boundingCircleRadius: 5
   };
 
+  var gameAreaBorder = 100; // px
+
 // Gravity
 // 9.8 m/s2
 // We use ms as time
@@ -157,13 +159,10 @@ var GF = function(){
   }
 
   function angleBetween2Lines(x1, y1, x2, y2, x3, y3, x4, y4) {
-    var dx1 = x2-x1, dy1 = y2-y1, dx2 = x4-x3, dy2 = y4-y3;
-
-    var d = dx1*dx2 + dy1*dy2;   // dot product of the 2 vectors
-    var l2 = (dx1*dx1+dy1*dy1)*(dx2*dx2+dy2*dy2); // product of the squared lengths
-
-    return Math.acos(d/Math.sqrt(l2));
+    return Math.atan2(y2 - y1, x2 - x1);
   }
+
+
 
   function drawAxis(x, y, theta, r) {
     ctx.save();
@@ -208,12 +207,28 @@ var GF = function(){
           ball.drawSelection();
 
           if(inputStates.mousedown) {
+
+            var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
+            if (powerInit > 100) {
+              powerInit = 100;
+            }
+            var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
+
+            currentBallParams = {
+              angle: Math.PI + angle,
+              v: powerInit * 5,
+              isSet: true
+            };
+
             ctx.save();
+            ctx.fillText("Angle " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 10, 20);
+            ctx.fillText("Power " + powerInit.toFixed(2), 10, 50);
             ctx.beginPath();
             ctx.strokeStyle = 'LightGreen';
             ctx.lineWidth = 3;
             ctx.moveTo(ball.x, ball.y);
-            ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
+            ctx.lineTo(ball.x + powerInit * Math.cos(2*Math.PI+angle), ball.y + powerInit * Math.sin(2*Math.PI+angle));
+            // ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
             ctx.stroke();
             ctx.beginPath();
             ctx.strokeStyle = 'BlueViolet';
@@ -236,15 +251,6 @@ var GF = function(){
             ctx.lineTo(ball.x + 25, ball.y);
             ctx.stroke();
 
-            var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
-
-            ctx.fillText("Angle " + (2*Math.PI - angle)  * (180/ Math.PI), 50, 150)
-
-            currentBallParams = {
-              angle: Math.PI + angle,
-              v: distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y),
-              isSet: true
-            };
             ctx.restore();
           }
         }
@@ -258,29 +264,37 @@ var GF = function(){
     }
   }
 
+  function drawGameAreaBorder() {
+    ctx.save();
+    ctx.strokeStyle = "Red";
+    ctx.rect(gameAreaBorder,gameAreaBorder,w - 2*gameAreaBorder,h - 2*gameAreaBorder);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function testCollisionWithWalls(ball) {
       // left
-      if (ball.x < ball.radius) {
-          ball.x = ball.radius;
+      if (ball.x < (ball.radius + gameAreaBorder)) {
+          ball.x = (ball.radius + gameAreaBorder);
           ball.collisionReset(Math.PI/2); // set current values like speed, angle, and reset run time to zero
           ball.angle = -ball.angle + Math.PI;
 
       }
       // right
-      if (ball.x > w - (ball.radius)) {
-          ball.x = w - (ball.radius);
+      if (ball.x > (w - gameAreaBorder) - (ball.radius)) {
+          ball.x = (w - gameAreaBorder) - (ball.radius);
           ball.collisionReset(Math.PI/2);
           ball.angle = -ball.angle + Math.PI;
       }
       // up
-      if (ball.y < ball.radius) {
-          ball.y = ball.radius;
+      if (ball.y < (ball.radius + gameAreaBorder)) {
+          ball.y = (ball.radius + gameAreaBorder);
           ball.collisionReset(Math.PI);
           ball.angle = -ball.angle;
       }
       // down
-      if (ball.y > h - (ball.radius)) {
-          ball.y = h - (ball.radius);
+      if (ball.y > (h - gameAreaBorder) - (ball.radius)) {
+          ball.y = (h - gameAreaBorder) - (ball.radius);
           ball.collisionReset(Math.PI);
           ball.angle = -ball.angle;
       }
@@ -453,6 +467,8 @@ var GF = function(){
 
       // Clear the canvas
       clearCanvas();
+
+      drawGameAreaBorder();
 
       // Update balls positions
       updateBalls(delta);
