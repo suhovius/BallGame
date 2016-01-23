@@ -19,6 +19,8 @@ var GF = function(){
   // for time based animation
   var delta, oldTime = 0;
 
+  var powerBoost = 5;
+
   // vars for handling inputs
   var inputStates = {};
 
@@ -216,13 +218,15 @@ var GF = function(){
 
             currentBallParams = {
               angle: Math.PI + angle,
-              v: powerInit * 5,
+              v: powerInit * powerBoost,
               isSet: true
             };
 
             ctx.save();
-            ctx.fillText("Angle " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 10, 20);
-            ctx.fillText("Power " + powerInit.toFixed(2), 10, 50);
+            ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 10, 20);
+            ctx.fillText("Speed: " + currentBallParams.v.toFixed(2), 10, 45);
+            ctx.fillText("Power: " + powerInit.toFixed(2), 10, 65);
+            ctx.fillText("Boost: " + powerBoost.toFixed(2), 10, 85);
             ctx.beginPath();
             ctx.strokeStyle = 'LightGreen';
             ctx.lineWidth = 3;
@@ -306,7 +310,7 @@ var GF = function(){
                   h/2,
                   Math.PI/2,
                   (1),
-                  15);
+                  20);
 
     ballArray[0] = ball;
   }
@@ -354,19 +358,26 @@ var GF = function(){
       this.angle = angle;
       this.v = v;
       this.radius = diameter / 2;
-      this.color = 'DarkOrange';
+      this.color = '#FF6633';
       this.runTime = 0;
       this.hitVelocity = 0;
       this.hitAngle = 0;
       this.hits = [];
 
       this.draw = function () {
-          ctx.save();
-          ctx.beginPath();
-          ctx.fillStyle = this.color;
-          ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-          ctx.fill();
-          ctx.restore();
+        ctx.save();
+        ctx.beginPath();
+
+        var innerRadius = 1,
+            outerRadius = this.radius * 1;
+
+        var gradient = ctx.createRadialGradient(this.x, this.y, innerRadius, this.x, this.y, outerRadius);
+        gradient.addColorStop(0, '#E0E0E0');
+        gradient.addColorStop(1, this.color);
+        ctx.fillStyle = gradient;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
       };
 
       this.drawSelection = function () {
