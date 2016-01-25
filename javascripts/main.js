@@ -26,6 +26,9 @@ var GF = function(){
 
   // array of balls to animate
   var ballArray = [];
+  var bricksArray = [];
+
+  var eps = 4;
 
   var player = {
     x:0,
@@ -124,6 +127,8 @@ var GF = function(){
 
       // 2) test if the ball collides with a wall
       testCollisionWithWalls(ball);
+
+      testCollisionWithBricks(ball);
 
       // 3) draw the ball
       ball.draw();
@@ -276,6 +281,85 @@ var GF = function(){
     ctx.restore();
   }
 
+  function circRectsOverlap(x0, y0, w0, h0, cx, cy, r) {
+    var testX = cx;
+    var testY = cy;
+
+    if (testX < x0)
+        testX = x0;
+    if (testX > (x0 + w0))
+        testX = (x0 + w0);
+    if (testY < y0)
+        testY = y0;
+    if (testY > (y0 + h0))
+        testY = (y0 + h0);
+
+    return (((cx - testX) * (cx - testX) + (cy - testY) * (cy - testY)) < r * r);
+  }
+
+  function ballBrickCollisionSides(ball, brick) {
+    // TODO this logic should be changed. Use should use lengths from ball center to walls
+    // and find closest pair of dots this will be collision side.
+    // if there are among rest dots pair of non closest dots than there is side dot hit.
+    var sides = [];
+
+    if (Math.abs((ball.y - ball.radius) - (brick.y + brick.size)) < eps ) {
+      sides.push("bottom");
+    }
+    if (Math.abs((ball.y + ball.radius) - brick.y ) < eps ) {
+      sides.push("top");
+    }
+    if (Math.abs((ball.x + ball.radius) - brick.x) < eps) {
+      sides.push("left");
+    }
+    if (Math.abs((ball.x - ball.radius) - (brick.x + brick.size)) < eps ) {
+      sides.push("right");
+    }
+    ctx.save();
+    ctx.fillText("Sides: " + sides.join(', '), 90, 90);
+    ctx.restore();
+    return sides;
+  }
+
+  function resetBallAfterBrickCollision(ball, brick) {
+    var sides =  ballBrickCollisionSides(ball, brick);
+    console.log(sides);
+    brick.drawCollision(sides);
+    if (sides.length == 2) {
+      // TODO process 45 degrees angles and our ligic still is not good
+    } else
+
+    if (sides.indexOf("left") != -1) {
+      ball.x = (brick.x - ball.radius);
+      ball.collisionReset(Math.PI/2);
+      ball.angle = -ball.angle + Math.PI;
+      console.log("left");
+    } else if (sides.indexOf("right") != -1) {
+      ball.x = (brick.x + brick.size + ball.radius);
+      ball.collisionReset(Math.PI/2);
+      ball.angle = -ball.angle + Math.PI;
+      console.log("right");
+    } else if (sides.indexOf("bottom") != -1) {
+      ball.y = (brick.y + brick.size + ball.radius);
+      ball.collisionReset(Math.PI);
+      ball.angle = -ball.angle;
+      console.log("bottom");
+    } else if (sides.indexOf("top") != -1) {
+      ball.y = (brick.y - ball.radius);
+      ball.collisionReset(Math.PI);
+      ball.angle = -ball.angle;
+      console.log("top");
+    }
+  }
+
+  function testCollisionWithBricks(ball) {
+    for (var i = 0; i < bricksArray.length; i ++) {
+      if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].size, bricksArray[i].size, ball.x, ball.y, ball.radius)) {
+        resetBallAfterBrickCollision(ball, bricksArray[i]);
+      }
+    }
+  }
+
   function testCollisionWithWalls(ball) {
       // left
       if (ball.x < (ball.radius + gameAreaBorder)) {
@@ -307,7 +391,7 @@ var GF = function(){
   function createMainBall() {
     ballArray = [];
     var ball = new Ball(w/2,
-                  h/2,
+                  (h - gameAreaBorder) - (10),
                   Math.PI/2,
                   (1),
                   20);
@@ -334,6 +418,17 @@ var GF = function(){
       }
   }
 
+  function createBricks() {
+    bricksArray.push(new Brick(w/2 - 25, (h/2 - 25), 50, "Grey"));
+    bricksArray.push(new Brick(w/2 + 70, (h/2 + 170), 30, "Orange"));
+  }
+
+  function updateBricks() {
+    for (var i = 0; i < bricksArray.length; i++) {
+      bricksArray[i].draw();
+    }
+  }
+
   function drawCollisionAngles(ball) {
     ctx.save();
     for (var i = 0; i < ball.hits.length - 1; i++) {
@@ -349,6 +444,71 @@ var GF = function(){
         }
     }
     ctx.restore();
+  }
+
+  function Brick(x,y, size, color) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+
+    this.draw = function () {
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.rect(this.x, this.y, this.size, this.size);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    this.sideLineCoordinates = function (side) {
+      var coordsHash = {
+        bottom: {
+          x1: this.x,
+          y1: this.y + this.size,
+          x2: this.x + this.size,
+          y2: this.y + this.size
+        },
+        top: {
+          x1: this.x,
+          y1: this.y,
+          x2: this.x + this.size,
+          y2: this.y
+        },
+        left: {
+          x1: this.x,
+          y1: this.y,
+          x2: this.x,
+          y2: this.y + this.size
+        },
+        right: {
+          x1: this.x + this.size,
+          y1: this.y,
+          x2: this.x + this.size,
+          y2: this.y + this.size
+        }
+      }
+      return coordsHash[side];
+    }
+
+    this.drawCollision = function (sides) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = 'Red';
+      ctx.rect(this.x+5, this.y+5, this.size-10, this.size-10);
+      ctx.fill();
+      ctx.strokeStyle = 'LightGreen';
+      ctx.lineWidth = 3;
+      for (var i=0; i < sides.length; i++) {
+        ctx.beginPath();
+        var lineCoordinates = this.sideLineCoordinates(sides[i]);
+        ctx.moveTo(lineCoordinates.x1, lineCoordinates.y1);
+        ctx.lineTo(lineCoordinates.x2, lineCoordinates.y2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
   }
 
 // constructor function for balls
@@ -427,6 +587,11 @@ var GF = function(){
       this.collisionReset = function (surfaceAngle) {
         var frictionReduction = 0.01; // ball rolls, velocity reduction factor per collision
         var speedCollisionReduction = 50; // ball hits velocity reduction factor per collision
+        // TODO use speed this formula too http://stackoverflow.com/questions/9424459/calculate-velocity-and-direction-of-a-ball-to-ball-collision-based-on-mass-and-b
+        // Use speed reduction coefficient
+        // v -  coefficient * v * angleCoefficient
+        // v * (1 - coefficient * angleCoefficient)
+
 
         this.runTime = 0;
         this.angle = this.currentAngle();
@@ -481,6 +646,7 @@ var GF = function(){
 
       drawGameAreaBorder();
 
+      updateBricks();
       // Update balls positions
       updateBalls(delta);
 
@@ -530,21 +696,21 @@ var GF = function(){
       // default police for text
       ctx.font="20px Arial";
 
-    // TODO: Use this later
-     //add the listener to the main, window object, and update the states
-    // window.addEventListener('keydown', function(event){
-    //     if (event.keyCode === 37) {
-    //        inputStates.left = true;
-    //     } else if (event.keyCode === 38) {
-    //        inputStates.up = true;
-    //     } else if (event.keyCode === 39) {
-    //        inputStates.right = true;
-    //     } else if (event.keyCode === 40) {
-    //        inputStates.down = true;
-    //     }  else if (event.keyCode === 32) {
-    //        inputStates.space = true;
-    //     }
-    // }, false);
+
+    // add the listener to the main, window object, and update the states
+    window.addEventListener('keydown', function(event){
+        if (event.keyCode === 37) {
+           inputStates.left = true;
+        } else if (event.keyCode === 38) {
+           inputStates.up = true;
+        } else if (event.keyCode === 39) {
+           inputStates.right = true;
+        } else if (event.keyCode === 40) {
+           inputStates.down = true;
+        }  else if (event.keyCode === 32) {
+           inputStates.space = true;
+        }
+    }, false);
 
     //if the key will be released, change the states object
     window.addEventListener('keyup', function(event){
@@ -579,6 +745,8 @@ var GF = function(){
 
 
     createMainBall();
+
+    createBricks();
 
     requestAnimationFrame(mainLoop);
 
