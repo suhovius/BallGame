@@ -28,7 +28,7 @@ var GF = function(){
   var ballArray = [];
   var bricksArray = [];
 
-  var eps = 4;
+  var eps = 7;
 
   var player = {
     x:0,
@@ -332,31 +332,30 @@ var GF = function(){
     var sides =  ballBrickCollisionSides(ball, brick);
     // console.log(sides);
     brick.drawCollision(sides);
-
     // 45 degree collision with brick's facet
     if (sides.length == 2) {
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
-        console.log("left and bottom 45");
+        // console.log("left and bottom 45");
       }
 
       if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
         ball.collisionReset(Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
-        console.log("top and right 45");
+        // console.log("top and right 45");
       }
 
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
-        console.log("left and top 135");
+        // console.log("left and top 135");
       }
 
       if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
-        console.log("right and bottom 135");
+        // console.log("right and bottom 135");
       }
 
     // brick side collisions
@@ -364,22 +363,22 @@ var GF = function(){
       ball.x = (brick.x - ball.radius);
       ball.collisionReset(Math.PI/2);
       ball.angle = -ball.angle + Math.PI;
-      console.log("left");
+      // console.log("left");
     } else if (sides.indexOf("right") != -1) {
       ball.x = (brick.x + brick.size + ball.radius);
       ball.collisionReset(Math.PI/2);
       ball.angle = -ball.angle + Math.PI;
-      console.log("right");
+      // console.log("right");
     } else if (sides.indexOf("bottom") != -1) {
       ball.y = (brick.y + brick.size + ball.radius);
       ball.collisionReset(Math.PI);
       ball.angle = -ball.angle;
-      console.log("bottom");
+      // console.log("bottom");
     } else if (sides.indexOf("top") != -1) {
       ball.y = (brick.y - ball.radius);
       ball.collisionReset(Math.PI);
       ball.angle = -ball.angle;
-      console.log("top");
+      // console.log("top");
     }
   }
 
@@ -452,6 +451,17 @@ var GF = function(){
   function createBricks() {
     bricksArray.push(new Brick(w/2 - 25, (h/2 - 25), 50, "Grey"));
     bricksArray.push(new Brick(w/2 + 70, (h/2 + 170), 30, "Orange"));
+    bricksArray.push(new Brick(w/2 + 101, (h/2 + 170), 30, "Green"));
+    bricksArray.push(new Brick(w/2 + 131, (h/2 + 170), 30, "Purple"));
+    bricksArray.push(new Brick(w/2 + 161, (h/2 + 170), 30, "#CC3399"));
+    bricksArray.push(new Brick(w/2 + 191, (h/2 + 170), 30, "#00CC33"));
+
+    bricksArray.push(new Brick(w/2 - 70, (h/2 + 170), 30, "Orange"));
+    bricksArray.push(new Brick(w/2 - 101, (h/2 + 170), 30, "Green"));
+    bricksArray.push(new Brick(w/2 - 131, (h/2 + 170), 30, "Purple"));
+    bricksArray.push(new Brick(w/2 - 161, (h/2 + 170), 30, "#CC3399"));
+    bricksArray.push(new Brick(w/2 - 191, (h/2 + 170), 30, "#00CC33"));
+
   }
 
   function updateBricks() {
