@@ -144,9 +144,9 @@ var GF = function(){
       player.y = inputStates.mousePos.y;
 
        // draws a circle
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.boundingCircleRadius, 0, 2*Math.PI);
-      ctx.stroke();
+      // ctx.beginPath();
+      // ctx.arc(player.x, player.y, player.boundingCircleRadius, 0, 2*Math.PI);
+      // ctx.stroke();
     }
 
     // if(inputStates.mouseDownPos) {
@@ -280,15 +280,6 @@ var GF = function(){
     ctx.rect(0, h-gameAreaBorder, w, gameAreaBorder);
     ctx.rect(0, gameAreaBorder, gameAreaBorder, h-2*gameAreaBorder);
     ctx.rect(w-gameAreaBorder, gameAreaBorder, w-gameAreaBorder, h-2*gameAreaBorder);
-    // ctx.moveTo(0,0);
-    // ctx.lineTo(w,0);
-    // ctx.lineTo(w,h);
-    // ctx.lineTo(gameAreaBorder,h);
-    // ctx.lineTo(gameAreaBorder,h-gameAreaBorder);
-    // ctx.lineTo(w-gameAreaBorder,h-gameAreaBorder);
-    // ctx.lineTo(w-gameAreaBorder,gameAreaBorder);
-    // ctx.lineTo(w-gameAreaBorder,h);
-    // ctx.lineTo(0,h);
     ctx.fillStyle = "#707070";
     ctx.fill();
     ctx.strokeStyle = "#383838";
@@ -339,13 +330,37 @@ var GF = function(){
 
   function resetBallAfterBrickCollision(ball, brick) {
     var sides =  ballBrickCollisionSides(ball, brick);
-    console.log(sides);
+    // console.log(sides);
     brick.drawCollision(sides);
-    if (sides.length == 2) {
-      // TODO process 45 degrees angles and our ligic still is not good
-    } else
 
-    if (sides.indexOf("left") != -1) {
+    // 45 degree collision with brick's facet
+    if (sides.length == 2) {
+      if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
+        ball.collisionReset(Math.PI/4);
+        ball.angle = -ball.angle + Math.PI;
+        console.log("left and bottom 45");
+      }
+
+      if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
+        ball.collisionReset(Math.PI/4);
+        ball.angle = -ball.angle + Math.PI;
+        console.log("top and right 45");
+      }
+
+      if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
+        ball.collisionReset(3*Math.PI/4);
+        ball.angle = -ball.angle + Math.PI;
+        console.log("left and top 135");
+      }
+
+      if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
+        ball.collisionReset(3*Math.PI/4);
+        ball.angle = -ball.angle + Math.PI;
+        console.log("right and bottom 135");
+      }
+
+    // brick side collisions
+    } else if (sides.indexOf("left") != -1) {
       ball.x = (brick.x - ball.radius);
       ball.collisionReset(Math.PI/2);
       ball.angle = -ball.angle + Math.PI;
