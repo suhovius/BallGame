@@ -275,7 +275,23 @@ var GF = function(){
 
   function drawGameAreaBorder() {
     ctx.save();
-    ctx.strokeStyle = "Red";
+    ctx.beginPath();
+    ctx.rect(0, 0, w, gameAreaBorder);
+    ctx.rect(0, h-gameAreaBorder, w, gameAreaBorder);
+    ctx.rect(0, gameAreaBorder, gameAreaBorder, h-2*gameAreaBorder);
+    ctx.rect(w-gameAreaBorder, gameAreaBorder, w-gameAreaBorder, h-2*gameAreaBorder);
+    // ctx.moveTo(0,0);
+    // ctx.lineTo(w,0);
+    // ctx.lineTo(w,h);
+    // ctx.lineTo(gameAreaBorder,h);
+    // ctx.lineTo(gameAreaBorder,h-gameAreaBorder);
+    // ctx.lineTo(w-gameAreaBorder,h-gameAreaBorder);
+    // ctx.lineTo(w-gameAreaBorder,gameAreaBorder);
+    // ctx.lineTo(w-gameAreaBorder,h);
+    // ctx.lineTo(0,h);
+    ctx.fillStyle = "#707070";
+    ctx.fill();
+    ctx.strokeStyle = "#383838";
     ctx.rect(gameAreaBorder,gameAreaBorder,w - 2*gameAreaBorder,h - 2*gameAreaBorder);
     ctx.stroke();
     ctx.restore();
