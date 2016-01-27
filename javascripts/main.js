@@ -636,7 +636,7 @@ var GF = function(){
 
       this.collisionReset = function (surfaceAngle) {
         var frictionReduction = 0.01; // ball rolls, velocity reduction factor per collision
-        var speedCollisionReduction = 0.3; // ball hits velocity reduction factor per collision
+        var speedCollisionReduction = 0.1; // ball hits velocity reduction factor per collision
         // TODO use speed this formula too http://stackoverflow.com/questions/9424459/calculate-velocity-and-direction-of-a-ball-to-ball-collision-based-on-mass-and-b
         // Use speed reduction coefficient
         // v -  coefficient * v * angleCoefficient
