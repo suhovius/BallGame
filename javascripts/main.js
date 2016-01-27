@@ -334,27 +334,36 @@ var GF = function(){
     brick.drawCollision(sides);
     // 45 degree collision with brick's facet
     if (sides.length == 2) {
+      var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
+        ball.x = (brick.x - offset);
+        ball.y = (brick.y + offset);
         // console.log("left and bottom 45");
       }
 
       if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
         ball.collisionReset(Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
+        ball.x = (brick.x + offset);
+        ball.y = (brick.y - offset);
         // console.log("top and right 45");
       }
 
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
+        ball.x = (brick.x - offset);
+        ball.y = (brick.y - offset);
         // console.log("left and top 135");
       }
 
       if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
         ball.angle = -ball.angle + Math.PI;
+        ball.x = (brick.x + offset);
+        ball.y = (brick.y + offset);
         // console.log("right and bottom 135");
       }
 
@@ -627,7 +636,7 @@ var GF = function(){
 
       this.collisionReset = function (surfaceAngle) {
         var frictionReduction = 0.01; // ball rolls, velocity reduction factor per collision
-        var speedCollisionReduction = 50; // ball hits velocity reduction factor per collision
+        var speedCollisionReduction = 0.3; // ball hits velocity reduction factor per collision
         // TODO use speed this formula too http://stackoverflow.com/questions/9424459/calculate-velocity-and-direction-of-a-ball-to-ball-collision-based-on-mass-and-b
         // Use speed reduction coefficient
         // v -  coefficient * v * angleCoefficient
@@ -655,10 +664,11 @@ var GF = function(){
         // Each one depends on angle and hit side
         // x = smallestAngle / (Math.PI / 2)
 
-        this.v = this.currentVelocity() - ((2 * smallestAngle) / Math.PI) * speedCollisionReduction - frictionReduction;
+        // this.v = this.currentVelocity() - ((2 * smallestAngle) / Math.PI) * speedCollisionReduction - frictionReduction;
+        this.v = this.currentVelocity() * (1- speedCollisionReduction * ((2 * smallestAngle) / Math.PI) - frictionReduction);
 
 
-        if (this.v < 0) {
+        if (this.v < 1) {
           this.v = 0;
         }
       }
