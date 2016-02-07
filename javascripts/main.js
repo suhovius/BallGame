@@ -237,6 +237,7 @@ var GF = function(){
             ctx.lineWidth = 3;
             ctx.moveTo(ball.x, ball.y);
             ctx.lineTo(ball.x + powerInit * Math.cos(2*Math.PI+angle), ball.y + powerInit * Math.sin(2*Math.PI+angle));
+            ctx.lineTo(ball.x - 500 * Math.cos(2*Math.PI+angle), ball.y - 500 * Math.sin(2*Math.PI+angle));
             // ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
             ctx.stroke();
             ctx.beginPath();
@@ -310,7 +311,7 @@ var GF = function(){
     // if there are among rest dots pair of non closest dots than there is side dot hit.
     var sides = [];
 
-    if (Math.abs((ball.y - ball.radius) - (brick.y + brick.size)) < eps ) {
+    if (Math.abs((ball.y - ball.radius) - (brick.y + brick.height)) < eps ) {
       sides.push("bottom");
     }
     if (Math.abs((ball.y + ball.radius) - brick.y ) < eps ) {
@@ -319,7 +320,7 @@ var GF = function(){
     if (Math.abs((ball.x + ball.radius) - brick.x) < eps) {
       sides.push("left");
     }
-    if (Math.abs((ball.x - ball.radius) - (brick.x + brick.size)) < eps ) {
+    if (Math.abs((ball.x - ball.radius) - (brick.x + brick.width)) < eps ) {
       sides.push("right");
     }
     ctx.save();
@@ -329,11 +330,24 @@ var GF = function(){
   }
 
   function resetBallAfterBrickCollision(ball, brick) {
+    // still this code needs fixes.
+    // collision detection is not accurate enough
     var sides =  ballBrickCollisionSides(ball, brick);
     // console.log(sides);
     brick.drawCollision(sides);
+    // first check strange sistuation when we can't determine which side was hit
+    // maybe it is related to ball speed issue or some bug in side detection algorithm
+    // so here we just reflect ball's angle into opposite direction
+    if (sides.length == 0) {
+      ball.collisionReset(Math.PI/4);
+      ball.angle = -ball.angle + Math.PI;
+      // calculate offset
+      ball.x = brick.x + ball.radius * Math.cos(ball.angle);
+      ball.y = brick.y + ball.radius * Math.sin(ball.angle);
+      console.log("unknown facet collision");
+    }
     // 45 degree collision with brick's facet
-    if (sides.length == 2) {
+    else if (sides.length == 2) {
       var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(Math.PI/4);
@@ -353,7 +367,7 @@ var GF = function(){
 
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
-        ball.angle = -ball.angle + Math.PI;
+        ball.angle = -ball.angle;
         ball.x = (brick.x - offset);
         ball.y = (brick.y - offset);
         // console.log("left and top 135");
@@ -361,7 +375,7 @@ var GF = function(){
 
       if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
-        ball.angle = -ball.angle + Math.PI;
+        ball.angle = -ball.angle;
         ball.x = (brick.x + offset);
         ball.y = (brick.y + offset);
         // console.log("right and bottom 135");
@@ -374,12 +388,12 @@ var GF = function(){
       ball.angle = -ball.angle + Math.PI;
       // console.log("left");
     } else if (sides.indexOf("right") != -1) {
-      ball.x = (brick.x + brick.size + ball.radius);
+      ball.x = (brick.x + brick.width + ball.radius);
       ball.collisionReset(Math.PI/2);
       ball.angle = -ball.angle + Math.PI;
       // console.log("right");
     } else if (sides.indexOf("bottom") != -1) {
-      ball.y = (brick.y + brick.size + ball.radius);
+      ball.y = (brick.y + brick.height + ball.radius);
       ball.collisionReset(Math.PI);
       ball.angle = -ball.angle;
       // console.log("bottom");
@@ -393,7 +407,7 @@ var GF = function(){
 
   function testCollisionWithBricks(ball) {
     for (var i = 0; i < bricksArray.length; i ++) {
-      if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].size, bricksArray[i].size, ball.x, ball.y, ball.radius)) {
+      if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
         resetBallAfterBrickCollision(ball, bricksArray[i]);
       }
     }
@@ -465,10 +479,10 @@ var GF = function(){
     bricksArray.push(new Brick(w/2 + 161, (h/2 + 170), 30, "#CC3399"));
     bricksArray.push(new Brick(w/2 + 191, (h/2 + 170), 30, "#00CC33"));
 
-    bricksArray.push(new Brick(w/2 - 70, (h/2 + 170), 30, "Orange"));
-    bricksArray.push(new Brick(w/2 - 101, (h/2 + 170), 30, "Green"));
-    bricksArray.push(new Brick(w/2 - 131, (h/2 + 170), 30, "Purple"));
-    bricksArray.push(new Brick(w/2 - 161, (h/2 + 170), 30, "#CC3399"));
+    bricksArray.push(new Brick(w/2 - 70, (h/2 - 50), 30, "Orange"));
+    bricksArray.push(new Brick(w/2 - 101, (h/2 + 100), 30, "Green"));
+    bricksArray.push(new Brick(w/2 - 131, (h/2 - 100), 30, "Purple"));
+    bricksArray.push(new Brick(w/2 - 161, (h/2 + 150), 30, "#CC3399"));
     bricksArray.push(new Brick(w/2 - 191, (h/2 + 170), 30, "#00CC33"));
 
   }
@@ -496,17 +510,18 @@ var GF = function(){
     ctx.restore();
   }
 
-  function Brick(x,y, size, color) {
+  function Brick(x,y, width, height, color) {
     this.x = x;
     this.y = y;
-    this.size = size;
+    this.width = width;
+    this.height = height
     this.color = color;
 
     this.draw = function () {
       ctx.save();
       ctx.beginPath();
       ctx.fillStyle = this.color;
-      ctx.rect(this.x, this.y, this.size, this.size);
+      ctx.rect(this.x, this.y, this.width, this.height);
       ctx.fill();
       ctx.restore();
     }
@@ -515,27 +530,27 @@ var GF = function(){
       var coordsHash = {
         bottom: {
           x1: this.x,
-          y1: this.y + this.size,
-          x2: this.x + this.size,
-          y2: this.y + this.size
+          y1: this.y + this.height,
+          x2: this.x + this.width,
+          y2: this.y + this.height
         },
         top: {
           x1: this.x,
           y1: this.y,
-          x2: this.x + this.size,
+          x2: this.x + this.width,
           y2: this.y
         },
         left: {
           x1: this.x,
           y1: this.y,
           x2: this.x,
-          y2: this.y + this.size
+          y2: this.y + this.height
         },
         right: {
-          x1: this.x + this.size,
+          x1: this.x + this.width,
           y1: this.y,
-          x2: this.x + this.size,
-          y2: this.y + this.size
+          x2: this.x + this.width,
+          y2: this.y + this.height
         }
       }
       return coordsHash[side];
@@ -545,7 +560,7 @@ var GF = function(){
       ctx.save();
       ctx.beginPath();
       ctx.fillStyle = 'Red';
-      ctx.rect(this.x+5, this.y+5, this.size-10, this.size-10);
+      ctx.rect(this.x+5, this.y+5, this.width-10, this.height-10);
       ctx.fill();
       ctx.strokeStyle = 'LightGreen';
       ctx.lineWidth = 3;
