@@ -36,6 +36,8 @@ var GF = function(){
     boundingCircleRadius: 5
   };
 
+  var currentGameState = "stopped";
+
   var gameAreaBorder = 100; // px
 
 // Gravity
@@ -371,25 +373,17 @@ var GF = function(){
       distances[sideKeys[i]] = dotLineLength(ball.x, ball.y, brick.coordinatesHash[sideKeys[i]].x1, brick.coordinatesHash[sideKeys[i]].y1, brick.coordinatesHash[sideKeys[i]].x2, brick.coordinatesHash[sideKeys[i]].y2, false);
     }
 
-    console.log(distances);
+    // console.log(distances);
 
     var distanceSideKeys = Object.keys(distances);
     var sortedDistanceSidesInAscendingOrder = distanceSideKeys.sort(function(a, b){return distances[a]-distances[b]});
 
     sides.push(sortedDistanceSidesInAscendingOrder[0]);
-    console.log(sides);
-    // var nearestSidePoints = sortedDistanceKeysInAscendingOrder.slice(0, 2);
-    // // console.log(nearestSidePoints);
-    // if (isArrayContainsSubArray(nearestSidePoints, ["topLeftPoint", "bottomLeftPoint"])) {
-    //   sides.push("left");
-    // } else if (isArrayContainsSubArray(nearestSidePoints, ["topRightPoint", "bottomRightPoint"])) {
-    //   sides.push("right");
-    // } else if (isArrayContainsSubArray(nearestSidePoints, ["topLeftPoint", "topRightPoint"])) {
-    //   sides.push("top");
-    // } else if (isArrayContainsSubArray(nearestSidePoints, ["bottomLeftPoint", "bottomRightPoint"])) {
-    //   sides.push("bottom");
-    // }
+    if (Math.abs(distances[sortedDistanceSidesInAscendingOrder[0]] - distances[sortedDistanceSidesInAscendingOrder[1]]) < 0.5) {
+      sides.push(sortedDistanceSidesInAscendingOrder[1]);
+    }
 
+    // console.log(sides);
     ctx.save();
     ctx.fillText("Sides: " + sides.join(', '), 90, 90);
     ctx.restore();
@@ -402,39 +396,28 @@ var GF = function(){
     var sides =  ballBrickCollisionSides(ball, brick);
     // console.log(sides);
     brick.drawCollision(sides);
-    // first check strange sistuation when we can't determine which side was hit
-    // maybe it is related to ball speed issue or some bug in side detection algorithm
-    // so here we just reflect ball's angle into opposite direction
-    if (sides.length == 0) {
-      ball.collisionReset(Math.PI/4);
-      ball.angle = -ball.angle + Math.PI;
-      // calculate offset
-      ball.x = brick.x + ball.radius * Math.cos(ball.angle);
-      ball.y = brick.y + ball.radius * Math.sin(ball.angle);
-      // console.log("unknown facet collision");
-    }
     // 45 degree collision with brick's facet
-    else if (sides.length == 2) {
+    if (sides.length == 2) {
       var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(Math.PI/4);
-        ball.angle = -ball.angle + Math.PI;
+        ball.angle = 3*Math.PI/4;
         ball.x = (brick.x - offset);
-        ball.y = (brick.y + offset);
+        ball.y = (brick.y + brick.height + offset);
         // console.log("left and bottom 45");
       }
 
       if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
         ball.collisionReset(Math.PI/4);
-        ball.angle = -ball.angle + Math.PI;
-        ball.x = (brick.x + offset);
+        ball.angle = 7*Math.PI/4;
+        ball.x = (brick.x + brick.width + offset);
         ball.y = (brick.y - offset);
         // console.log("top and right 45");
       }
 
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
-        ball.angle = -ball.angle;
+        ball.angle = 5*Math.PI/4;
         ball.x = (brick.x - offset);
         ball.y = (brick.y - offset);
         // console.log("left and top 135");
@@ -442,9 +425,9 @@ var GF = function(){
 
       if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
-        ball.angle = -ball.angle;
-        ball.x = (brick.x + offset);
-        ball.y = (brick.y + offset);
+        ball.angle = Math.PI/4;
+        ball.x = (brick.x + brick.width + offset);
+        ball.y = (brick.y + brick.height + offset);
         // console.log("right and bottom 135");
       }
 
@@ -470,6 +453,8 @@ var GF = function(){
       ball.angle = -ball.angle;
       // console.log("top");
     }
+
+    //currentGameState = "frozenDebug";
   }
 
   function testCollisionWithBricks(ball) {
@@ -831,8 +816,10 @@ var GF = function(){
       updateTelemetry(ballArray[0]);
     //  drawCollisionAngles(ballArray[0]);
 
-      // call the animation loop every 1/60th of second
-      requestAnimationFrame(mainLoop);
+      if (currentGameState != "frozenDebug") {
+        // call the animation loop every 1/60th of second
+        requestAnimationFrame(mainLoop);
+      }
   };
 
 
@@ -847,6 +834,9 @@ var GF = function(){
 
 
   var start = function(){
+
+      currentGameState = "started";
+
       // adds a div for displaying the fps value
       fpsContainer = document.createElement('div');
       document.body.appendChild(fpsContainer);
