@@ -379,6 +379,7 @@ var GF = function(){
     var sortedDistanceSidesInAscendingOrder = distanceSideKeys.sort(function(a, b){return distances[a]-distances[b]});
 
     sides.push(sortedDistanceSidesInAscendingOrder[0]);
+    // TODO: Find better coefficient for this
     if (Math.abs(distances[sortedDistanceSidesInAscendingOrder[0]] - distances[sortedDistanceSidesInAscendingOrder[1]]) < 0.5) {
       sides.push(sortedDistanceSidesInAscendingOrder[1]);
     }
@@ -401,7 +402,8 @@ var GF = function(){
       var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(Math.PI/4);
-        ball.angle = 3*Math.PI/4;
+        // ball.angle = 3*Math.PI/4;
+        ball.angle = - ball.angle + Math.PI;
         ball.x = (brick.x - offset);
         ball.y = (brick.y + brick.height + offset);
         // console.log("left and bottom 45");
@@ -409,7 +411,8 @@ var GF = function(){
 
       if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
         ball.collisionReset(Math.PI/4);
-        ball.angle = 7*Math.PI/4;
+        // ball.angle = 7*Math.PI/4;
+        ball.angle = - ball.angle + Math.PI;
         ball.x = (brick.x + brick.width + offset);
         ball.y = (brick.y - offset);
         // console.log("top and right 45");
@@ -417,7 +420,8 @@ var GF = function(){
 
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
-        ball.angle = 5*Math.PI/4;
+        // ball.angle = 5*Math.PI/4;
+        ball.angle = - ball.angle + Math.PI;
         ball.x = (brick.x - offset);
         ball.y = (brick.y - offset);
         // console.log("left and top 135");
@@ -425,7 +429,8 @@ var GF = function(){
 
       if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(3*Math.PI/4);
-        ball.angle = Math.PI/4;
+        // ball.angle = Math.PI/4;
+        ball.angle = - ball.angle + Math.PI;
         ball.x = (brick.x + brick.width + offset);
         ball.y = (brick.y + brick.height + offset);
         // console.log("right and bottom 135");
