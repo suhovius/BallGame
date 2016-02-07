@@ -344,7 +344,7 @@ var GF = function(){
       // calculate offset
       ball.x = brick.x + ball.radius * Math.cos(ball.angle);
       ball.y = brick.y + ball.radius * Math.sin(ball.angle);
-      console.log("unknown facet collision");
+      // console.log("unknown facet collision");
     }
     // 45 degree collision with brick's facet
     else if (sides.length == 2) {
@@ -472,18 +472,28 @@ var GF = function(){
   }
 
   function createBricks() {
-    bricksArray.push(new Brick(w/2 - 25, (h/2 - 25), 50, "Grey"));
-    bricksArray.push(new Brick(w/2 + 70, (h/2 + 170), 30, "Orange"));
-    bricksArray.push(new Brick(w/2 + 101, (h/2 + 170), 30, "Green"));
-    bricksArray.push(new Brick(w/2 + 131, (h/2 + 170), 30, "Purple"));
-    bricksArray.push(new Brick(w/2 + 161, (h/2 + 170), 30, "#CC3399"));
-    bricksArray.push(new Brick(w/2 + 191, (h/2 + 170), 30, "#00CC33"));
+    bricksArray.push(new SquareBrick(w/2 - 25, (h/2 - 25), 50, "Grey"));
+    bricksArray.push(new SquareBrick(w/2 + 70, (h/2 + 170), 30, "Orange"));
+    bricksArray.push(new SquareBrick(w/2 + 101, (h/2 + 170), 30, "Green"));
+    bricksArray.push(new SquareBrick(w/2 + 131, (h/2 + 170), 30, "Purple"));
+    bricksArray.push(new SquareBrick(w/2 + 161, (h/2 + 170), 30, "#CC3399"));
+    bricksArray.push(new SquareBrick(w/2 + 191, (h/2 + 170), 30, "#00CC33"));
 
-    bricksArray.push(new Brick(w/2 - 70, (h/2 - 50), 30, "Orange"));
-    bricksArray.push(new Brick(w/2 - 101, (h/2 + 100), 30, "Green"));
-    bricksArray.push(new Brick(w/2 - 131, (h/2 - 100), 30, "Purple"));
-    bricksArray.push(new Brick(w/2 - 161, (h/2 + 150), 30, "#CC3399"));
-    bricksArray.push(new Brick(w/2 - 191, (h/2 + 170), 30, "#00CC33"));
+    bricksArray.push(new SquareBrick(w/2 - 70, (h/2 - 50), 30, "Orange"));
+    bricksArray.push(new SquareBrick(w/2 - 101, (h/2 + 100), 30, "Green"));
+    bricksArray.push(new SquareBrick(w/2 - 131, (h/2 - 100), 30, "Purple"));
+    bricksArray.push(new SquareBrick(w/2 - 161, (h/2 + 150), 30, "#CC3399"));
+    bricksArray.push(new SquareBrick(w/2 - 191, (h/2 + 170), 30, "#00CC33"));
+
+    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 30), 300, 20, "#0099FF"));
+
+    bricksArray.push(new Brick(gameAreaBorder + 400, (gameAreaBorder + 100), 100, 50, "#CCFF99"));
+
+    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
+
+    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 100, "#0099FF"));
+
+    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 30), 20, 450, "#0099FF"));
 
   }
 
@@ -574,6 +584,12 @@ var GF = function(){
 
       ctx.restore();
     }
+  }
+
+  function SquareBrick(x, y, size, color) {
+    // http://stackoverflow.com/questions/2107556/how-to-inherit-from-a-class-in-javascript/2107586#2107586
+    // Function application or "constructor chaining"
+    Brick.apply(this,[x, y, size, size, color]);
   }
 
 // constructor function for balls
