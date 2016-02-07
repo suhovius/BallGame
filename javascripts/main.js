@@ -483,18 +483,20 @@ var GF = function(){
     bricksArray.push(new SquareBrick(w/2 - 101, (h/2 + 100), 30, "Green"));
     bricksArray.push(new SquareBrick(w/2 - 131, (h/2 - 100), 30, "Purple"));
     bricksArray.push(new SquareBrick(w/2 - 161, (h/2 + 150), 30, "#CC3399"));
-    bricksArray.push(new SquareBrick(w/2 - 191, (h/2 + 170), 30, "#00CC33"));
+
+    bricksArray.push(new SquareBrick(w - gameAreaBorder - 100, gameAreaBorder + 30, 30, "#00CC33"));
 
     bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 30), 300, 20, "#0099FF"));
 
-    bricksArray.push(new Brick(gameAreaBorder + 400, (gameAreaBorder + 100), 100, 50, "#CCFF99"));
+    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 100), 150, 50, "#CCFF99"));
 
     bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
 
     bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 100, "#0099FF"));
 
-    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 30), 20, 450, "#0099FF"));
+    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 52), 20, 380, "#0099FF"));
 
+    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 480), 20, 20, "#0099FF"));
   }
 
   function updateBricks() {
@@ -530,7 +532,19 @@ var GF = function(){
     this.draw = function () {
       ctx.save();
       ctx.beginPath();
-      ctx.fillStyle = this.color;
+
+      var gradientOffset = (width > height) ? height : width;
+
+      var gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+      gradient.addColorStop(0, '#E0E0E0');
+      gradient.addColorStop(1, this.color);
+      ctx.fillStyle = gradient;
+
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 3;
+
       ctx.rect(this.x, this.y, this.width, this.height);
       ctx.fill();
       ctx.restore();
@@ -569,8 +583,8 @@ var GF = function(){
     this.drawCollision = function (sides) {
       ctx.save();
       ctx.beginPath();
-      ctx.fillStyle = 'Red';
-      ctx.rect(this.x+5, this.y+5, this.width-10, this.height-10);
+      ctx.fillStyle = 'rgba(255, 0, 0 , 0.5)';
+      ctx.rect(this.x, this.y, this.width, this.height);
       ctx.fill();
       ctx.strokeStyle = 'LightGreen';
       ctx.lineWidth = 3;
@@ -612,11 +626,17 @@ var GF = function(){
         var innerRadius = 1,
             outerRadius = this.radius * 1;
 
-        var gradient = ctx.createRadialGradient(this.x, this.y, innerRadius, this.x, this.y, outerRadius);
+        var gradient = ctx.createRadialGradient(this.x-this.radius * 0.3, this.y -this.radius * 0.3, innerRadius, this.x -this.radius * 0.3, this.y-this.radius * 0.3, outerRadius);
         gradient.addColorStop(0, '#E0E0E0');
         gradient.addColorStop(1, this.color);
         ctx.fillStyle = gradient;
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 3;
+
         ctx.fill();
         ctx.restore();
       };
