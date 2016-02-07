@@ -305,24 +305,91 @@ var GF = function(){
     return (((cx - testX) * (cx - testX) + (cy - testY) * (cy - testY)) < r * r);
   }
 
+  function isArrayContainsSubArray(array, subArray) {
+    for (i in subArray) {
+      if (array.indexOf(subArray[i]) == -1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // http://jsfromhell.com/math/dot-line-length
+  // dotLineLength(x: Integer, y: Integer, x0: Integer, y0: Integer, x1: Integer, y1: Integer, [overLine: Boolean = False]): Double
+  // Distance from a point to a line or segment.
+  // x - point's x coord
+  // y - point's y coord
+  // x0 - x coord of the line's A point
+  // y0 - y coord of the line's A point
+  // x1 - x coord of the line's B point
+  // y1 - y coord of the line's B point
+  // overLine - specifies if the distance should respect the limits of the segment (overLine = true)
+  //            or if it should consider the segment as an infinite line (overLine = false),
+  //            if false returns the distance from the point to the line, otherwise the distance from
+  //            the point to the segment
+  function dotLineLength(x, y, x0, y0, x1, y1, o){
+    function lineLength(x, y, x0, y0){
+        return Math.sqrt((x -= x0) * x + (y -= y0) * y);
+    }
+    if(o && !(o = function(x, y, x0, y0, x1, y1){
+        if(!(x1 - x0)) return {x: x0, y: y};
+        else if(!(y1 - y0)) return {x: x, y: y0};
+        var left, tg = -1 / ((y1 - y0) / (x1 - x0));
+        return {x: left = (x1 * (x * tg - y + y0) + x0 * (x * - tg + y - y1)) / (tg * (x1 - x0) + y0 - y1), y: tg * left - tg * x + y};
+    }(x, y, x0, y0, x1, y1), o.x >= Math.min(x0, x1) && o.x <= Math.max(x0, x1) && o.y >= Math.min(y0, y1) && o.y <= Math.max(y0, y1))){
+        var l1 = lineLength(x, y, x0, y0), l2 = lineLength(x, y, x1, y1);
+        return l1 > l2 ? l2 : l1;
+    }
+    else {
+        var a = y0 - y1, b = x1 - x0, c = x0 * y1 - y0 * x1;
+        return Math.abs(a * x + b * y + c) / Math.sqrt(a * a + b * b);
+    }
+};
+
   function ballBrickCollisionSides(ball, brick) {
     // TODO this logic should be changed. Use should use lengths from ball center to walls
     // and find closest pair of dots this will be collision side.
     // if there are among rest dots pair of non closest dots than there is side dot hit.
     var sides = [];
 
-    if (Math.abs((ball.y - ball.radius) - (brick.y + brick.height)) < eps ) {
-      sides.push("bottom");
+    // if (Math.abs((ball.y - ball.radius) - (brick.y + brick.height)) < eps ) {
+    //   sides.push("bottom");
+    // }
+    // if (Math.abs((ball.y + ball.radius) - brick.y ) < eps ) {
+    //   sides.push("top");
+    // }
+    // if (Math.abs((ball.x + ball.radius) - brick.x) < eps) {
+    //   sides.push("left");
+    // }
+    // if (Math.abs((ball.x - ball.radius) - (brick.x + brick.width)) < eps ) {
+    //   sides.push("right");
+    // }
+
+    var distances = {};
+    var sideKeys = Object.keys(brick.coordinatesHash);
+    for (i in sideKeys) {
+      distances[sideKeys[i]] = dotLineLength(ball.x, ball.y, brick.coordinatesHash[sideKeys[i]].x1, brick.coordinatesHash[sideKeys[i]].y1, brick.coordinatesHash[sideKeys[i]].x2, brick.coordinatesHash[sideKeys[i]].y2, false);
     }
-    if (Math.abs((ball.y + ball.radius) - brick.y ) < eps ) {
-      sides.push("top");
-    }
-    if (Math.abs((ball.x + ball.radius) - brick.x) < eps) {
-      sides.push("left");
-    }
-    if (Math.abs((ball.x - ball.radius) - (brick.x + brick.width)) < eps ) {
-      sides.push("right");
-    }
+
+    console.log(distances);
+
+    var distanceSideKeys = Object.keys(distances);
+    var sortedDistanceSidesInAscendingOrder = distanceSideKeys.sort(function(a, b){return distances[a]-distances[b]});
+
+    sides.push(sortedDistanceSidesInAscendingOrder[0]);
+    console.log(sides);
+    // var nearestSidePoints = sortedDistanceKeysInAscendingOrder.slice(0, 2);
+    // // console.log(nearestSidePoints);
+    // if (isArrayContainsSubArray(nearestSidePoints, ["topLeftPoint", "bottomLeftPoint"])) {
+    //   sides.push("left");
+    // } else if (isArrayContainsSubArray(nearestSidePoints, ["topRightPoint", "bottomRightPoint"])) {
+    //   sides.push("right");
+    // } else if (isArrayContainsSubArray(nearestSidePoints, ["topLeftPoint", "topRightPoint"])) {
+    //   sides.push("top");
+    // } else if (isArrayContainsSubArray(nearestSidePoints, ["bottomLeftPoint", "bottomRightPoint"])) {
+    //   sides.push("bottom");
+    // }
+
     ctx.save();
     ctx.fillText("Sides: " + sides.join(', '), 90, 90);
     ctx.restore();
@@ -529,6 +596,33 @@ var GF = function(){
     this.height = height
     this.color = color;
 
+    this.coordinatesHash = {
+      bottom: {
+        x1: this.x,
+        y1: this.y + this.height,
+        x2: this.x + this.width,
+        y2: this.y + this.height
+      },
+      top: {
+        x1: this.x,
+        y1: this.y,
+        x2: this.x + this.width,
+        y2: this.y
+      },
+      left: {
+        x1: this.x,
+        y1: this.y,
+        x2: this.x,
+        y2: this.y + this.height
+      },
+      right: {
+        x1: this.x + this.width,
+        y1: this.y,
+        x2: this.x + this.width,
+        y2: this.y + this.height
+      }
+    }
+
     this.draw = function () {
       ctx.save();
       ctx.beginPath();
@@ -551,33 +645,7 @@ var GF = function(){
     }
 
     this.sideLineCoordinates = function (side) {
-      var coordsHash = {
-        bottom: {
-          x1: this.x,
-          y1: this.y + this.height,
-          x2: this.x + this.width,
-          y2: this.y + this.height
-        },
-        top: {
-          x1: this.x,
-          y1: this.y,
-          x2: this.x + this.width,
-          y2: this.y
-        },
-        left: {
-          x1: this.x,
-          y1: this.y,
-          x2: this.x,
-          y2: this.y + this.height
-        },
-        right: {
-          x1: this.x + this.width,
-          y1: this.y,
-          x2: this.x + this.width,
-          y2: this.y + this.height
-        }
-      }
-      return coordsHash[side];
+      return this.coordinatesHash[side];
     }
 
     this.drawCollision = function (sides) {
