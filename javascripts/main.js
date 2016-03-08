@@ -370,7 +370,7 @@ var GF = function(){
     var distances = {};
     var sideKeys = Object.keys(brick.coordinatesHash);
     for (i in sideKeys) {
-      distances[sideKeys[i]] = dotLineLength(ball.x, ball.y, brick.coordinatesHash[sideKeys[i]].x1, brick.coordinatesHash[sideKeys[i]].y1, brick.coordinatesHash[sideKeys[i]].x2, brick.coordinatesHash[sideKeys[i]].y2, false);
+      distances[sideKeys[i]] = dotLineLength(ball.x, ball.y, brick.coordinatesHash[sideKeys[i]].x1, brick.coordinatesHash[sideKeys[i]].y1, brick.coordinatesHash[sideKeys[i]].x2, brick.coordinatesHash[sideKeys[i]].y2, true);
     }
 
     // console.log(distances);
@@ -399,7 +399,13 @@ var GF = function(){
     brick.drawCollision(sides);
     // 45 degree collision with brick's facet
     if (sides.length == 2) {
-      var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
+      // var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
+      // if (ball.v == 0) {
+      //   offset = ball.radius;
+      // }
+
+      var offset = ball.radius;
+
       if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
         ball.collisionReset(Math.PI/4);
         // ball.angle = 3*Math.PI/4;
@@ -457,9 +463,16 @@ var GF = function(){
       ball.collisionReset(Math.PI);
       ball.angle = -ball.angle;
       // console.log("top");
+
+      // When ball is slipping (rotating) from the edge
+      if (ball.x < brick.coordinatesHash.top.x1) {
+        ball.x = ball.x - 3;
+      } else if (ball.x > brick.coordinatesHash.top.x2) {
+        ball.x = ball.x + 3;
+      }
     }
 
-    //currentGameState = "frozenDebug";
+   // currentGameState = "frozenDebug";
   }
 
   function testCollisionWithBricks(ball) {
@@ -501,7 +514,7 @@ var GF = function(){
   function createMainBall() {
     ballArray = [];
     var ball = new Ball(w/2,
-                  (h - gameAreaBorder) - (10),
+                  (h-gameAreaBorder-10),
                   Math.PI/2,
                   (1),
                   20);
@@ -549,7 +562,7 @@ var GF = function(){
 
     bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
 
-    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 100, "#0099FF"));
+    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 70, "#0099FF"));
 
     bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 52), 20, 380, "#0099FF"));
 
