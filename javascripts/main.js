@@ -37,9 +37,21 @@ var GF = function(){
     boundingCircleRadius: 5
   };
 
-  var currentGameState = "stopped";
+  // game states
+  var gameStates = {
+      mainMenu: 0,
+      gameRunning: 1,
+      nextLevelMenu: 2,
+      gameOver: 3,
+      frozenDebug: 4
+  };
+  // var currentGameState = gameStates.gameRunning;
+  var currentGameState = gameStates.nextLevelMenu;
+  var currentLevel = 1;
 
   var gameAreaBorder = 100; // px
+
+  var nextLevelMenubuttons = [];
 
 // Gravity
 // 9.8 m/s2
@@ -133,12 +145,14 @@ var GF = function(){
 
       testCollisionWithBricks(ball);
 
+      testGateHits(ball);
+
       // 3) draw the ball
       ball.draw();
     }
   }
 
-  function updatePlayer() {
+  function updatePlayerCursor() {
     // The player is just a circle, drawn at the mouse position
     // Just to test circle/circle collision.
 
@@ -473,7 +487,7 @@ var GF = function(){
       }
     }
 
-   // currentGameState = "frozenDebug";
+    // currentGameState =  gameStates.frozenDebug;
   }
 
   function testCollisionWithBricks(ball) {
@@ -514,12 +528,7 @@ var GF = function(){
 
   function createMainBall(x, y) {
     ballArray = [];
-    var ball = new Ball(x,
-                  y,
-                  Math.PI/2,
-                  (1),
-                  20);
-
+    var ball = new Ball(x, y, Math.PI/2, 1, 20, "player");
     ballArray[0] = ball;
   }
 
@@ -559,11 +568,9 @@ var GF = function(){
 
     bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 30), 300, 20, "#0099FF"));
 
-    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 100), 150, 50, "#CCFF99"));
+    //bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 100), 150, 50, "#CCFF99"));
 
-    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
-
-    // bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 70, "#0099FF"));
+//    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
 
     bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 52), 20, 380, "#0099FF"));
 
@@ -679,7 +686,7 @@ var GF = function(){
   }
 
 // constructor function for balls
-  function Ball(x, y, angle, v, diameter) {
+  function Ball(x, y, angle, v, diameter, role) {
       this.x = x;
       this.y = y;
       this.angle = angle;
@@ -690,6 +697,7 @@ var GF = function(){
       this.hitVelocity = 0;
       this.hitAngle = 0;
       this.hits = [];
+      this.role = role;
 
       this.draw = function () {
         ctx.save();
@@ -841,6 +849,17 @@ var GF = function(){
     }
   }
 
+  function testGateHits(ball) {
+    for (var i = 0; i < gatesArray.length; i++) {
+      if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 3) {
+        // Gate hit detected
+        if ((gatesArray[i].type === "finish") && (ball.role === "player") ) {
+          currentGameState = gameStates.nextLevelMenu;
+        }
+      }
+    }
+  }
+
   function timer(currentTime) {
     var delta = currentTime - oldTime;
     oldTime = currentTime;
@@ -848,7 +867,101 @@ var GF = function(){
 
   }
 
+  function MenuButton(x, y, w, h, text) {
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.w = w;
+    this.h = h;
+    this.state = "released"; // 'clicked', 'released'
+
+    this.draw = function() {
+      ctx.save();
+      ctx.beginPath();
+
+      ctx.rect(x, y, w, h);
+      ctx.fillStyle = "grey";
+      ctx.fill();
+
+      ctx.fillStyle="#C8C8C8";
+      ctx.font = "35px Arial";
+      ctx.fillText(this.text, x+5, y+35);
+      ctx.restore();
+    }
+
+    this.drawSelection = function() {
+      ctx.save();
+      ctx.beginPath();
+
+      ctx.rect(x, y, 390, 50);
+      ctx.fillStyle = 'rgba(0, 255, 0 , 0.1)';
+      ctx.fill();
+
+      ctx.fillStyle="#33CC33";
+      ctx.font = "35px Arial";
+      ctx.fillText(this.text, x+5, y+35);
+      ctx.restore();
+    }
+
+    this.click = function() {
+      this.state = "clicked";
+    }
+
+    this.releaseHandler = function() {
+      // Assign some code here outside of button
+    }
+
+    this.release = function() {
+      if (this.state === "clicked") {
+        this.state = "released";
+        // console.log("Menu Button release: " + this.text);
+        this.releaseHandler();
+      }
+    }
+  }
+
+  function createNextLevelMenu() {
+    var buttonWidth = 390, buttonHeight = 50;
+    var nextLevelButton = new MenuButton(w/2 - 195, gameAreaBorder + 55, buttonWidth, buttonHeight, "Start Next Level");
+    var replayCurrentLevelButton = new MenuButton(w/2 - 195, gameAreaBorder + 108, buttonWidth, buttonHeight, "Replay Current Level");
+    replayCurrentLevelButton.releaseHandler = function() {
+      startGame();
+    }
+    nextLevelMenubuttons = [nextLevelButton, replayCurrentLevelButton];
+  }
+
+  function drawNextLevelMenu(buttons) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle="#33CC33";
+    ctx.font = "70px Arial";
+    ctx.fillText("Level " + currentLevel+ " Complete!", 35, 70);
+    ctx.rect(w/2 - 200, gameAreaBorder + 50, 400, 400);
+    ctx.strokeStyle = "grey";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.restore();
+
+
+    for(var i=0; i < buttons.length; i++) {
+      buttons[i].draw();
+      // Draw button that was selected by user
+      if ((player.x && player.y) && circRectsOverlap(buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h, player.x, player.y, 1)) {
+        buttons[i].drawSelection();
+
+        if (inputStates.mouseDownPos && (inputStates.mouseDownPos.x == player.x && inputStates.mouseDownPos.y == player.y)) {
+          buttons[i].click();
+        }
+
+        if (inputStates.mouseUpPos && (inputStates.mouseUpPos.x == player.x && inputStates.mouseUpPos.y == player.y)) {
+          buttons[i].release();
+        }
+      }
+    }
+  }
+
   var mainLoop = function(time){
+
       //main function, called each frame
       measureFPS(time);
 
@@ -860,27 +973,55 @@ var GF = function(){
 
       drawGameAreaBorder();
 
-      updateGates();
+      updatePlayerCursor();
 
-      updateBricks();
-      // Update balls positions
-      updateBalls(delta);
+      switch (currentGameState) {
+        case gameStates.gameRunning:
 
-      updatePlayer();
+          updateGates();
 
-      checkBallControllable();
+          updateBricks();
+          // Update balls positions
+          updateBalls(delta);
 
+          checkBallControllable();
 
-      //drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
-      //drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
+          //drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
+          //drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
 
-      updateTelemetry(ballArray[0]);
-    //  drawCollisionAngles(ballArray[0]);
+          updateTelemetry(ballArray[0]);
+          //  drawCollisionAngles(ballArray[0]);
 
-      if (currentGameState != "frozenDebug") {
+        case gameStates.mainMenu:
+          // TODO Add UI menu
+          break;
+        case gameStates.nextLevelMenu:
+          drawNextLevelMenu(nextLevelMenubuttons);
+          break;
+        case gameStates.gameOver:
+          ctx.save();
+          ctx.beginPath();
+          ctx.fillStyle="FF3333";
+          ctx.font = "70px Arial";
+          ctx.fillText("GAME OVER", 35, 70);
+          ctx.restore();
+          // TODO! Add more UI friendly information
+          break;
+      }
+
+      if (currentGameState != gameStates.frozenDebug) {
         // call the animation loop every 1/60th of second
         requestAnimationFrame(mainLoop);
+      } else {
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle="Red";
+        ctx.font = "70px Arial";
+        ctx.fillText("Frozen Debug Mode", 35, 70);
+        ctx.restore();
+        console.log("Frozen Debug Mode");
       }
+
   };
 
 
@@ -893,10 +1034,17 @@ var GF = function(){
       };
   }
 
+  function startGame() {
+    ballArray = [];
+    bricksArray = [];
+    gatesArray = [];
+    createBricks();
+    var startGate = createGates().find(function(gate) { return gate.type === "start"; });
+    createMainBall(startGate.x, startGate.y);
+    currentGameState = gameStates.gameRunning;
+  }
 
   var start = function(){
-
-      currentGameState = "started";
 
       // adds a div for displaying the fps value
       fpsContainer = document.createElement('div');
@@ -957,19 +1105,20 @@ var GF = function(){
           inputStates.mousedown = true;
           inputStates.mouseButton = evt.button;
           inputStates.mouseDownPos = getMousePos(evt);
+          inputStates.mouseUpPos = null;
     }, false);
 
     canvas.addEventListener('mouseup', function (evt) {
         inputStates.mousedown = false;
         inputStates.mouseDownPos = null; // clean mouse down position
+        inputStates.mouseUpPos = getMousePos(evt);
     }, false);
 
 
-    createBricks();
+    // create Menu buttons
+    createNextLevelMenu();
 
-    var startGate = createGates().find(function(gate) { return gate.type === "start" });
-
-    createMainBall(startGate.x, startGate.y);
+    startGame();
 
     requestAnimationFrame(mainLoop);
 
