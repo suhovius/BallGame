@@ -27,6 +27,7 @@ var GF = function(){
   // array of balls to animate
   var ballArray = [];
   var bricksArray = [];
+  var gatesArray = [];
 
   var eps = 7;
 
@@ -511,10 +512,10 @@ var GF = function(){
       }
   }
 
-  function createMainBall() {
+  function createMainBall(x, y) {
     ballArray = [];
-    var ball = new Ball(w/2,
-                  (h-gameAreaBorder-10),
+    var ball = new Ball(x,
+                  y,
                   Math.PI/2,
                   (1),
                   20);
@@ -543,11 +544,11 @@ var GF = function(){
 
   function createBricks() {
     bricksArray.push(new SquareBrick(w/2 - 25, (h/2 - 25), 50, "Grey"));
-    bricksArray.push(new SquareBrick(w/2 + 70, (h/2 + 170), 30, "Orange"));
-    bricksArray.push(new SquareBrick(w/2 + 101, (h/2 + 170), 30, "Green"));
-    bricksArray.push(new SquareBrick(w/2 + 131, (h/2 + 170), 30, "Purple"));
-    bricksArray.push(new SquareBrick(w/2 + 161, (h/2 + 170), 30, "#CC3399"));
-    bricksArray.push(new SquareBrick(w/2 + 191, (h/2 + 170), 30, "#00CC33"));
+    bricksArray.push(new SquareBrick(w/2 + 70, (h/2 + 190), 30, "Orange"));
+    bricksArray.push(new SquareBrick(w/2 + 101, (h/2 + 160), 30, "Green"));
+    bricksArray.push(new SquareBrick(w/2 + 131, (h/2 + 130), 30, "Purple"));
+    bricksArray.push(new SquareBrick(w/2 + 161, (h/2 + 100), 30, "#CC3399"));
+    bricksArray.push(new SquareBrick(w/2 + 191, (h/2 + 219), 30, "#00CC33"));
 
     bricksArray.push(new SquareBrick(w/2 - 70, (h/2 - 50), 30, "Orange"));
     bricksArray.push(new SquareBrick(w/2 - 101, (h/2 + 100), 30, "Green"));
@@ -562,7 +563,7 @@ var GF = function(){
 
     bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
 
-    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 70, "#0099FF"));
+    // bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 300), 20, 70, "#0099FF"));
 
     bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 52), 20, 380, "#0099FF"));
 
@@ -800,6 +801,46 @@ var GF = function(){
       }
   }
 
+  function Gate(x, y, diameter, text, color, type) {
+    this.x = x;
+    this.y = y;
+    this.radius = diameter / 2;
+    this.text = text;
+    this.color = color;
+    this.type = type; // start, finish
+
+    this.draw = function () {
+      ctx.save();
+      ctx.beginPath();
+
+      ctx.fillStyle = "black";
+      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = "#808080";
+      ctx.lineWidth=3;
+
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.fillStyle=this.color;
+      ctx.font = (Math.ceil(this.radius*1.5).toString() + "px Arial");
+      ctx.fillText(this.text,this.x-this.radius/2,this.y+this.radius/2);
+
+      ctx.restore();
+    };
+  }
+
+  function createGates() {
+    gatesArray.push(new Gate(w/2, (h-gameAreaBorder-10), 23, "A", "#A8A8A8", "start"));
+    gatesArray.push(new Gate((w-gameAreaBorder-15), (gameAreaBorder+15), 23, "Z", "#009900", "finish"));
+    return gatesArray;
+  }
+
+  function updateGates() {
+    for (var i = 0; i < gatesArray.length; i++) {
+      gatesArray[i].draw();
+    }
+  }
+
   function timer(currentTime) {
     var delta = currentTime - oldTime;
     oldTime = currentTime;
@@ -818,6 +859,8 @@ var GF = function(){
       clearCanvas();
 
       drawGameAreaBorder();
+
+      updateGates();
 
       updateBricks();
       // Update balls positions
@@ -922,9 +965,11 @@ var GF = function(){
     }, false);
 
 
-    createMainBall();
-
     createBricks();
+
+    var startGate = createGates().find(function(gate) { return gate.type === "start" });
+
+    createMainBall(startGate.x, startGate.y);
 
     requestAnimationFrame(mainLoop);
 
