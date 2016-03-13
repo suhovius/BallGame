@@ -126,12 +126,6 @@ var GF = function(){
      ctx.clearRect(0, 0, w, h);
    }
 
-  function circleCollide(x1, y1, r1, x2, y2, r2) {
-    var dx = x1 - x2;
-    var dy = y1 - y2;
-    return ((dx * dx + dy * dy) < (r1 + r2)*(r1+r2));
-  }
-
   function updateBalls(delta) {
     // Move and draw each ball, test collisions,
     for (var i = 0; i < ballArray.length; i++) {
@@ -178,65 +172,24 @@ var GF = function(){
     // }
   }
 
-  function distanceBettweenToPoints(x1, y1, x2, y2) {
-    return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
-  }
-
-  function angleBetween2Lines(x1, y1, x2, y2, x3, y3, x4, y4) {
-    return Math.atan2(y2 - y1, x2 - x1);
-  }
-
-
-
-  function drawAxis(x, y, theta, r) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.strokeStyle = 'Orange';
-    ctx.fillStyle = 'Orange';
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-    ctx.fillText("0", w-25, y+25);
-    ctx.fillText("90", x-30, h-25);
-    ctx.fillText("180", 25, y-25);
-    ctx.fillText("270", x+25, 50);
-
-    ctx.beginPath();
-    ctx.strokeStyle = 'Red';
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
   function checkBallControllable() {
     for (var i = 0; i < ballArray.length; i++) {
         var ball = ballArray[i];
 
-        if(circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+        if (CollisionDetection.circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
           ball.drawSelection();
-          ctx.fillText("Collision", 150, 20);
-          ctx.strokeStyle = ctx.fillStyle = 'red';
-
-        } else {
-          ctx.fillText("No collision", 150, 20);
-          ctx.strokeStyle = ctx.fillStyle = 'black';
         }
 
-        if (ball.isInLaunchPosition() && inputStates.mouseDownPos && circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+        if (ball.isInLaunchPosition() && inputStates.mouseDownPos && CollisionDetection.circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
           ball.drawSelection();
 
           if(inputStates.mousedown) {
 
-            var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
+            var powerInit = MathUtils.distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
             if (powerInit > 100) {
               powerInit = 100;
             }
-            var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
+            var angle = MathUtils.angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
 
             currentBallParams = {
               angle: Math.PI + angle,
@@ -331,38 +284,6 @@ var GF = function(){
     return true;
   }
 
-  // http://jsfromhell.com/math/dot-line-length
-  // dotLineLength(x: Integer, y: Integer, x0: Integer, y0: Integer, x1: Integer, y1: Integer, [overLine: Boolean = False]): Double
-  // Distance from a point to a line or segment.
-  // x - point's x coord
-  // y - point's y coord
-  // x0 - x coord of the line's A point
-  // y0 - y coord of the line's A point
-  // x1 - x coord of the line's B point
-  // y1 - y coord of the line's B point
-  // overLine - specifies if the distance should respect the limits of the segment (overLine = true)
-  //            or if it should consider the segment as an infinite line (overLine = false),
-  //            if false returns the distance from the point to the line, otherwise the distance from
-  //            the point to the segment
-  function dotLineLength(x, y, x0, y0, x1, y1, o){
-    function lineLength(x, y, x0, y0){
-        return Math.sqrt((x -= x0) * x + (y -= y0) * y);
-    }
-    if(o && !(o = function(x, y, x0, y0, x1, y1){
-        if(!(x1 - x0)) return {x: x0, y: y};
-        else if(!(y1 - y0)) return {x: x, y: y0};
-        var left, tg = -1 / ((y1 - y0) / (x1 - x0));
-        return {x: left = (x1 * (x * tg - y + y0) + x0 * (x * - tg + y - y1)) / (tg * (x1 - x0) + y0 - y1), y: tg * left - tg * x + y};
-    }(x, y, x0, y0, x1, y1), o.x >= Math.min(x0, x1) && o.x <= Math.max(x0, x1) && o.y >= Math.min(y0, y1) && o.y <= Math.max(y0, y1))){
-        var l1 = lineLength(x, y, x0, y0), l2 = lineLength(x, y, x1, y1);
-        return l1 > l2 ? l2 : l1;
-    }
-    else {
-        var a = y0 - y1, b = x1 - x0, c = x0 * y1 - y0 * x1;
-        return Math.abs(a * x + b * y + c) / Math.sqrt(a * a + b * b);
-    }
-};
-
   function ballBrickCollisionSides(ball, brick) {
     // TODO this logic should be changed. Use should use lengths from ball center to walls
     // and find closest pair of dots this will be collision side.
@@ -385,7 +306,7 @@ var GF = function(){
     var distances = {};
     var sideKeys = Object.keys(brick.coordinatesHash);
     for (i in sideKeys) {
-      distances[sideKeys[i]] = dotLineLength(ball.x, ball.y, brick.coordinatesHash[sideKeys[i]].x1, brick.coordinatesHash[sideKeys[i]].y1, brick.coordinatesHash[sideKeys[i]].x2, brick.coordinatesHash[sideKeys[i]].y2, true);
+      distances[sideKeys[i]] = MathUtils.dotLineLength(ball.x, ball.y, brick.coordinatesHash[sideKeys[i]].x1, brick.coordinatesHash[sideKeys[i]].y1, brick.coordinatesHash[sideKeys[i]].x2, brick.coordinatesHash[sideKeys[i]].y2, true);
     }
 
     // console.log(distances);
@@ -413,52 +334,53 @@ var GF = function(){
     // console.log(sides);
     brick.drawCollision(sides);
     // 45 degree collision with brick's facet
-    if (sides.length == 2) {
-      // var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
-      // if (ball.v == 0) {
-      //   offset = ball.radius;
-      // }
+    // if (sides.length == 2) {
+    //   // var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem
+    //   // if (ball.v == 0) {
+    //   //   offset = ball.radius;
+    //   // }
 
-      var offset = ball.radius;
+    //   var offset = ball.radius;
 
-      if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
-        ball.collisionReset(Math.PI/4);
-        // ball.angle = 3*Math.PI/4;
-        ball.angle = - ball.angle + Math.PI;
-        ball.x = (brick.x - offset);
-        ball.y = (brick.y + brick.height + offset);
-        // console.log("left and bottom 45");
-      }
+    //   if ( (sides.indexOf("left") != -1) && (sides.indexOf("bottom") != -1) ) {
+    //     ball.collisionReset(Math.PI/4);
+    //     // ball.angle = 3*Math.PI/4;
+    //     ball.angle = - ball.angle + Math.PI;
+    //     ball.x = (brick.x - offset);
+    //     ball.y = (brick.y + brick.height + offset);
+    //     // console.log("left and bottom 45");
+    //   }
 
-      if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
-        ball.collisionReset(Math.PI/4);
-        // ball.angle = 7*Math.PI/4;
-        ball.angle = - ball.angle + Math.PI;
-        ball.x = (brick.x + brick.width + offset);
-        ball.y = (brick.y - offset);
-        // console.log("top and right 45");
-      }
+    //   if ( (sides.indexOf("top") != -1) && (sides.indexOf("right") != -1) ) {
+    //     ball.collisionReset(Math.PI/4);
+    //     // ball.angle = 7*Math.PI/4;
+    //     ball.angle = - ball.angle + Math.PI;
+    //     ball.x = (brick.x + brick.width + offset);
+    //     ball.y = (brick.y - offset);
+    //     // console.log("top and right 45");
+    //   }
 
-      if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
-        ball.collisionReset(3*Math.PI/4);
-        // ball.angle = 5*Math.PI/4;
-        ball.angle = - ball.angle + Math.PI;
-        ball.x = (brick.x - offset);
-        ball.y = (brick.y - offset);
-        // console.log("left and top 135");
-      }
+    //   if ( (sides.indexOf("left") != -1) && (sides.indexOf("top") != -1) ) {
+    //     ball.collisionReset(3*Math.PI/4);
+    //     // ball.angle = 5*Math.PI/4;
+    //     ball.angle = - ball.angle + Math.PI;
+    //     ball.x = (brick.x - offset);
+    //     ball.y = (brick.y - offset);
+    //     // console.log("left and top 135");
+    //   }
 
-      if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
-        ball.collisionReset(3*Math.PI/4);
-        // ball.angle = Math.PI/4;
-        ball.angle = - ball.angle + Math.PI;
-        ball.x = (brick.x + brick.width + offset);
-        ball.y = (brick.y + brick.height + offset);
-        // console.log("right and bottom 135");
-      }
+    //   if ( (sides.indexOf("right") != -1) && (sides.indexOf("bottom") != -1) ) {
+    //     ball.collisionReset(3*Math.PI/4);
+    //     // ball.angle = Math.PI/4;
+    //     ball.angle = - ball.angle + Math.PI;
+    //     ball.x = (brick.x + brick.width + offset);
+    //     ball.y = (brick.y + brick.height + offset);
+    //     // console.log("right and bottom 135");
+    //   }
 
-    // brick side collisions
-    } else if (sides.indexOf("left") != -1) {
+    // // brick side collisions
+    // } else
+    if (sides.indexOf("left") != -1) {
       ball.x = (brick.x - ball.radius);
       ball.collisionReset(Math.PI/2);
       ball.angle = -ball.angle + Math.PI;
@@ -851,7 +773,7 @@ var GF = function(){
 
   function testGateHits(ball) {
     for (var i = 0; i < gatesArray.length; i++) {
-      if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 3) {
+      if (MathUtils.distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 3) {
         // Gate hit detected
         if ((gatesArray[i].type === "finish") && (ball.role === "player") ) {
           currentGameState = gameStates.nextLevelMenu;
@@ -986,8 +908,8 @@ var GF = function(){
 
           checkBallControllable();
 
-          //drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
-          //drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
+          // DebugUtils(ctx, w, h).drawAxis(w/2, h/2, ballArray[0].hitAngle, 200);
+          // DebugUtils(ctx, w, h).drawAxis(w/2, h/2, 235 * (Math.PI / 180), 200);
 
           updateTelemetry(ballArray[0]);
           //  drawCollisionAngles(ballArray[0]);
