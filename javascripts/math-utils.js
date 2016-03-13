@@ -21,7 +21,7 @@ var MathUtils = (function() {
   //            or if it should consider the segment as an infinite line (overLine = false),
   //            if false returns the distance from the point to the line, otherwise the distance from
   //            the point to the segment
-  function dotLineLength(x, y, x0, y0, x1, y1, o){
+  var dotLineLength = function(x, y, x0, y0, x1, y1, o){
     function lineLength(x, y, x0, y0){
         return Math.sqrt((x -= x0) * x + (y -= y0) * y);
     }
@@ -40,10 +40,21 @@ var MathUtils = (function() {
     }
   };
 
+  // We want the object to move at speed pixels/s (there are 60 frames in a second)
+  // If we are really running at 60 frames/s, the delay between frames should be 1/60
+  // = 16.66 ms, so the number of pixels to move = (speed * del)/1000. If the delay is twice
+  // longer, the formula works
+  var calcDistanceToMove = function(delta, speed) {
+    //console.log("#delta = " + delta + " speed = " + speed);
+    return (speed * delta) / 1000;
+  };
+
+
   return {
     distanceBettweenToPoints: distanceBettweenToPoints,
     angleBetween2Lines: angleBetween2Lines,
-    dotLineLength: dotLineLength
+    dotLineLength: dotLineLength,
+    calcDistanceToMove: calcDistanceToMove
   };
 
 })();
