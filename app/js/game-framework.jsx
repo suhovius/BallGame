@@ -1,4 +1,8 @@
-var GameFramework = function() {
+import CollisionDetection from './collision-detection';
+import DebugUtils from './debug-utils';
+import MathUtils from './math-utils';
+
+export default function() {
   // Vars relative to the canvas
   var canvas, ctx, w, h;
 
@@ -519,7 +523,7 @@ var GameFramework = function() {
 
   function testGateHits(ball) {
     for (var i = 0; i < gatesArray.length; i++) {
-      if (MathUtils.distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 3) {
+      if (MathUtils.distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
         // Gate hit detected
         if ((gatesArray[i].type === "finish") && (ball.role === "player") ) {
           currentGameState = gameStates.nextLevelMenu;
