@@ -1,10 +1,11 @@
 import Constants from '../constants';
-import canvasData from '../canvas-data';
+import Graphical from './graphical';
 import MathUtils from '../math-utils';
 
-export default class Ball {
+export default class Ball extends Graphical {
 
   constructor(x, y, angle, v, diameter, role) {
+    super();
     this.x = x;
     this.y = y;
     this.angle = angle;
@@ -19,7 +20,7 @@ export default class Ball {
   }
 
   draw() {
-    var ctx = canvasData.getContext2D();
+    let ctx = this.context();
     ctx.save();
     ctx.beginPath();
 
@@ -42,7 +43,7 @@ export default class Ball {
   }
 
   drawSelection() {
-    var ctx = canvasData.getContext2D();
+    let ctx = this.context();
     ctx.save();
     ctx.beginPath();
     if (this.isInLaunchPosition()) {
