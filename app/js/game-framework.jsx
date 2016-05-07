@@ -1,6 +1,9 @@
 import CollisionDetection from './collision-detection';
 import DebugUtils from './debug-utils';
 import MathUtils from './math-utils';
+import Constants from './constants';
+import canvasData from './canvas-data';
+import Ball from './classes/ball';
 
 export default function() {
   // Vars relative to the canvas
@@ -47,14 +50,7 @@ export default function() {
 
   var nextLevelMenubuttons = [];
 
-// Gravity
-// 9.8 m/s2
-// We use ms as time
-// Suppose that 1 px is 1 mm than
-// 1 m = 1000 mm
-// 9.8 * 1000 mm / (1000 ms * 1000 ms)
-// 9.8 * 1000 / ( 1000 * 1000 ) =0.0098 px/ms2
-  var gravityAcceleration = 0.098;
+  var gravityAcceleration = Constants.GRAVITY_ACCELERATION;
 
   var currentBallParams = {};
 
@@ -125,130 +121,6 @@ export default function() {
     }
 
   }
-
-  // constructor function for balls
-  function Ball(x, y, angle, v, diameter, role) {
-      this.x = x;
-      this.y = y;
-      this.angle = angle;
-      this.v = v;
-      this.radius = diameter / 2;
-      this.color = '#FF6633';
-      this.runTime = 0;
-      this.hitVelocity = 0;
-      this.hitAngle = 0;
-      this.hits = [];
-      this.role = role;
-
-      this.draw = function () {
-        ctx.save();
-        ctx.beginPath();
-
-        var innerRadius = 1,
-            outerRadius = this.radius * 1;
-
-        var gradient = ctx.createRadialGradient(this.x-this.radius * 0.3, this.y -this.radius * 0.3, innerRadius, this.x -this.radius * 0.3, this.y-this.radius * 0.3, outerRadius);
-        gradient.addColorStop(0, '#E0E0E0');
-        gradient.addColorStop(1, this.color);
-        ctx.fillStyle = gradient;
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-        ctx.shadowColor = 'black';
-        ctx.shadowBlur = 3;
-
-        ctx.fill();
-        ctx.restore();
-      };
-
-      this.drawSelection = function () {
-        ctx.save();
-        ctx.beginPath();
-        if (this.isInLaunchPosition()) {
-            ctx.beginPath();
-            ctx.strokeStyle = 'LightGreen';
-            ctx.lineWidth=3;
-              ctx.arc(this.x, this.y, this.radius + 3, 0, 2 * Math.PI);
-            ctx.stroke();
-          };
-        ctx.restore();
-      };
-
-      this.vX = function () {
-        return this.v * Math.cos(this.angle);
-      }
-
-      this.vY = function () {
-        return this.v * Math.sin(this.angle) + (gravityAcceleration * this.runTime);
-      }
-
-      this.currentVelocity = function () {
-        return Math.sqrt(this.vX()*this.vX() + this.vY()*this.vY());
-      }
-
-      this.currentAngle = function () {
-        var value = Math.atan2(this.vY(), this.vX());
-        return isNaN(value) ? 0 : value;
-      }
-
-      this.move = function () {
-          // add horizontal increment to the x pos
-          // add vertical increment to the y pos
-
-          this.runTime += delta;
-
-          var incX = this.vX();
-          var incY = this.vY();
-
-         this.x += MathUtils.calcDistanceToMove(delta, incX);
-         this.y += MathUtils.calcDistanceToMove(delta, incY);
-
-      };
-
-      this.collisionReset = function (surfaceAngle) {
-        var frictionReduction = 0.01; // ball rolls, velocity reduction factor per collision
-        var speedCollisionReduction = 0.1; // ball hits velocity reduction factor per collision
-        // TODO use speed this formula too http://stackoverflow.com/questions/9424459/calculate-velocity-and-direction-of-a-ball-to-ball-collision-based-on-mass-and-b
-        // Use speed reduction coefficient
-        // v -  coefficient * v * angleCoefficient
-        // v * (1 - coefficient * angleCoefficient)
-
-
-        this.runTime = 0;
-        this.angle = this.currentAngle();
-        this.hitAngle = this.angle;
-        this.hitVelocity = this.v;
-
-        var smallestAngle = Math.abs(Math.atan2(Math.sin(surfaceAngle-this.hitAngle), Math.cos(surfaceAngle-this.hitAngle)));
-        smallestAngle = (smallestAngle > (Math.PI / 2) ? Math.abs(Math.PI - smallestAngle) : smallestAngle);
-
-        this.hits.push({
-          angleBetween: smallestAngle,
-          angle: this.hitAngle,
-          x: this.x,
-          y: this.y
-        });
-
-        // You should use ball's hit side and angle to this side.
-        // So, means ball could glide both by x and y coodinates
-        // There are two situations gliding (rolling) and hit.
-        // Each one depends on angle and hit side
-        // x = smallestAngle / (Math.PI / 2)
-
-        // this.v = this.currentVelocity() - ((2 * smallestAngle) / Math.PI) * speedCollisionReduction - frictionReduction;
-        this.v = this.currentVelocity() * (1- speedCollisionReduction * ((2 * smallestAngle) / Math.PI) - frictionReduction);
-
-
-        if (this.v < 1) {
-          this.v = 0;
-        }
-      }
-
-      this.isInLaunchPosition = function() {
-        return (this.v == 0);
-      }
-  };
 
   function checkBallControllable() {
     for (var i = 0; i < ballArray.length; i++) {
@@ -726,14 +598,19 @@ export default function() {
       document.body.appendChild(telemetryContainer);
 
       // Canvas, context etc.
-      canvas = document.querySelector("#myCanvas");
+
+      canvas = canvasData.getCanvas();
+
+
+      // canvas = document.querySelector("#myCanvas");
 
       // often useful
       w = canvas.width;
       h = canvas.height;
 
       // important, we will draw with this object
-      ctx = canvas.getContext('2d');
+      ctx = canvasData.getContext2D();
+      //ctx = canvas.getContext('2d');
       // default police for text
       ctx.font="20px Arial";
 
