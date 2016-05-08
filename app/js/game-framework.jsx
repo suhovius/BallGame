@@ -3,6 +3,10 @@ import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
 import { distanceBettweenToPoints, angleBetween2Lines, calcDistanceToMove } from './math-utils';
 import canvasData from './canvas-data';
 import Ball from './classes/ball';
+import Brick from './classes/brick';
+import SquareBrick from './classes/square-brick';
+import Gate from './classes/gate';
+import MenuButton from './classes/menu-button';
 
 export default function() {
   // Vars relative to the canvas
@@ -265,119 +269,6 @@ export default function() {
     }
   }
 
-  function Brick(x,y, width, height, color) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height
-    this.color = color;
-
-    this.coordinatesHash = {
-      bottom: {
-        x1: this.x,
-        y1: this.y + this.height,
-        x2: this.x + this.width,
-        y2: this.y + this.height
-      },
-      top: {
-        x1: this.x,
-        y1: this.y,
-        x2: this.x + this.width,
-        y2: this.y
-      },
-      left: {
-        x1: this.x,
-        y1: this.y,
-        x2: this.x,
-        y2: this.y + this.height
-      },
-      right: {
-        x1: this.x + this.width,
-        y1: this.y,
-        x2: this.x + this.width,
-        y2: this.y + this.height
-      }
-    }
-
-    this.draw = function () {
-      ctx.save();
-      ctx.beginPath();
-
-      var gradientOffset = (width > height) ? height : width;
-
-      var gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
-      gradient.addColorStop(0, '#E0E0E0');
-      gradient.addColorStop(1, this.color);
-      ctx.fillStyle = gradient;
-
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
-      ctx.shadowColor = 'black';
-      ctx.shadowBlur = 3;
-
-      ctx.rect(this.x, this.y, this.width, this.height);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    this.sideLineCoordinates = function (side) {
-      return this.coordinatesHash[side];
-    }
-
-    this.drawCollision = function (sides) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(255, 0, 0 , 0.5)';
-      ctx.rect(this.x, this.y, this.width, this.height);
-      ctx.fill();
-      ctx.strokeStyle = 'LightGreen';
-      ctx.lineWidth = 3;
-      for (var i=0; i < sides.length; i++) {
-        ctx.beginPath();
-        var lineCoordinates = this.sideLineCoordinates(sides[i]);
-        ctx.moveTo(lineCoordinates.x1, lineCoordinates.y1);
-        ctx.lineTo(lineCoordinates.x2, lineCoordinates.y2);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-  }
-
-  function SquareBrick(x, y, size, color) {
-    // http://stackoverflow.com/questions/2107556/how-to-inherit-from-a-class-in-javascript/2107586#2107586
-    // Function application or "constructor chaining"
-    Brick.apply(this,[x, y, size, size, color]);
-  }
-
-  function Gate(x, y, diameter, text, color, type) {
-    this.x = x;
-    this.y = y;
-    this.radius = diameter / 2;
-    this.text = text;
-    this.color = color;
-    this.type = type; // start, finish
-
-    this.draw = function () {
-      ctx.save();
-      ctx.beginPath();
-
-      ctx.fillStyle = "black";
-      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = "#808080";
-      ctx.lineWidth=3;
-
-      ctx.stroke();
-      ctx.fill();
-
-      ctx.fillStyle=this.color;
-      ctx.font = (Math.ceil(this.radius*1.5).toString() + "px Arial");
-      ctx.fillText(this.text,this.x-this.radius/2,this.y+this.radius/2);
-
-      ctx.restore();
-    };
-  }
-
   function createGates() {
     gatesArray.push(new Gate(w/2, (h-gameAreaBorder-10), 23, "A", "#A8A8A8", "start"));
     gatesArray.push(new Gate((w-gameAreaBorder-15), (gameAreaBorder+15), 23, "Z", "#009900", "finish"));
@@ -406,59 +297,6 @@ export default function() {
     oldTime = currentTime;
     return delta;
 
-  }
-
-  function MenuButton(x, y, w, h, text) {
-    this.x = x;
-    this.y = y;
-    this.text = text;
-    this.w = w;
-    this.h = h;
-    this.state = "released"; // 'clicked', 'released'
-
-    this.draw = function() {
-      ctx.save();
-      ctx.beginPath();
-
-      ctx.rect(x, y, w, h);
-      ctx.fillStyle = "grey";
-      ctx.fill();
-
-      ctx.fillStyle="#C8C8C8";
-      ctx.font = "35px Arial";
-      ctx.fillText(this.text, x+5, y+35);
-      ctx.restore();
-    }
-
-    this.drawSelection = function() {
-      ctx.save();
-      ctx.beginPath();
-
-      ctx.rect(x, y, 390, 50);
-      ctx.fillStyle = 'rgba(0, 255, 0 , 0.1)';
-      ctx.fill();
-
-      ctx.fillStyle="#33CC33";
-      ctx.font = "35px Arial";
-      ctx.fillText(this.text, x+5, y+35);
-      ctx.restore();
-    }
-
-    this.click = function() {
-      this.state = "clicked";
-    }
-
-    this.releaseHandler = function() {
-      // Assign some code here outside of button
-    }
-
-    this.release = function() {
-      if (this.state === "clicked") {
-        this.state = "released";
-        // console.log("Menu Button release: " + this.text);
-        this.releaseHandler();
-      }
-    }
   }
 
   function createNextLevelMenu() {
