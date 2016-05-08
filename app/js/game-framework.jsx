@@ -1,7 +1,6 @@
-import CollisionDetection from './collision-detection';
-import DebugUtils from './debug-utils';
-import MathUtils from './math-utils';
-import Constants from './constants';
+import { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision } from './collision-detection';
+import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
+import { distanceBettweenToPoints, angleBetween2Lines, calcDistanceToMove } from './math-utils';
 import canvasData from './canvas-data';
 import Ball from './classes/ball';
 
@@ -50,8 +49,6 @@ export default function() {
 
   var nextLevelMenubuttons = [];
 
-  var gravityAcceleration = Constants.GRAVITY_ACCELERATION;
-
   var currentBallParams = {};
 
   var msToSeconds = function(timeMs) {
@@ -95,7 +92,7 @@ export default function() {
       ball.move(delta);
 
       // 2) test if the ball collides with a wall
-      CollisionDetection.testCollisionWithWalls(w, h, gameAreaBorder, ball);
+      testCollisionWithWalls(w, h, gameAreaBorder, ball);
 
       testCollisionWithBricks(ball);
 
@@ -126,20 +123,20 @@ export default function() {
     for (var i = 0; i < ballArray.length; i++) {
         var ball = ballArray[i];
 
-        if (CollisionDetection.circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+        if (circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
           ball.drawSelection();
         }
 
-        if (ball.isInLaunchPosition() && inputStates.mouseDownPos && CollisionDetection.circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+        if (ball.isInLaunchPosition() && inputStates.mouseDownPos && circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
           ball.drawSelection();
 
           if(inputStates.mousedown) {
 
-            var powerInit = MathUtils.distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
+            var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
             if (powerInit > 100) {
               powerInit = 100;
             }
-            var angle = MathUtils.angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
+            var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
 
             currentBallParams = {
               angle: Math.PI + angle,
@@ -205,8 +202,8 @@ export default function() {
 
   function testCollisionWithBricks(ball) {
     for (var i = 0; i < bricksArray.length; i ++) {
-      if (CollisionDetection.circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
-        CollisionDetection.resetBallAfterBrickCollision(ball, bricksArray[i]);
+      if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
+        resetBallAfterBrickCollision(ball, bricksArray[i]);
       }
     }
   }
@@ -395,7 +392,7 @@ export default function() {
 
   function testGateHits(ball) {
     for (var i = 0; i < gatesArray.length; i++) {
-      if (MathUtils.distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
+      if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
         // Gate hit detected
         if ((gatesArray[i].type === "finish") && (ball.role === "player") ) {
           currentGameState = gameStates.nextLevelMenu;
@@ -490,7 +487,7 @@ export default function() {
     for(var i=0; i < buttons.length; i++) {
       buttons[i].draw();
       // Draw button that was selected by user
-      if ((player.x && player.y) && CollisionDetection.circRectsOverlap(buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h, player.x, player.y, 1)) {
+      if ((player.x && player.y) && circRectsOverlap(buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h, player.x, player.y, 1)) {
         buttons[i].drawSelection();
 
         if (inputStates.mouseDownPos && (inputStates.mouseDownPos.x == player.x && inputStates.mouseDownPos.y == player.y)) {
@@ -530,11 +527,11 @@ export default function() {
 
           checkBallControllable();
 
-          // DebugUtils.drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
-          // DebugUtils.drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);
+          // drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
+          // drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);
 
-          DebugUtils.updateTelemetry(telemetryContainer, ballArray[0]);
-          // DebugUtils.drawCollisionAngles(ctx, w, h, ballArray[0]);
+          updateTelemetry(telemetryContainer, ballArray[0]);
+          // drawCollisionAngles(ctx, w, h, ballArray[0]);
 
         case gameStates.mainMenu:
           // TODO Add UI menu

@@ -1,6 +1,7 @@
 import Constants from '../constants';
 import Graphical from './graphical';
-import MathUtils from '../math-utils';
+import { calcDistanceToMove } from '../math-utils';
+import { GRAVITY_ACCELERATION } from '../constants';
 
 export default class Ball extends Graphical {
 
@@ -61,7 +62,7 @@ export default class Ball extends Graphical {
   }
 
   vY() {
-    return this.v * Math.sin(this.angle) + (Constants.GRAVITY_ACCELERATION * this.runTime);
+    return this.v * Math.sin(this.angle) + (GRAVITY_ACCELERATION * this.runTime);
   }
 
   currentVelocity() {
@@ -82,8 +83,8 @@ export default class Ball extends Graphical {
     var incX = this.vX();
     var incY = this.vY();
 
-   this.x += MathUtils.calcDistanceToMove(delta, incX);
-   this.y += MathUtils.calcDistanceToMove(delta, incY);
+   this.x += calcDistanceToMove(delta, incX);
+   this.y += calcDistanceToMove(delta, incY);
   }
 
   collisionReset(surfaceAngle) {
