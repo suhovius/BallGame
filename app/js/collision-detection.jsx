@@ -162,5 +162,13 @@ function resetBallAfterBrickCollision(ball, brick) {
 
 }
 
-export { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision }
+function testCollisionWithBricks(bricksArray, ball) {
+  for (var i = 0; i < bricksArray.length; i ++) {
+    if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
+      resetBallAfterBrickCollision(ball, bricksArray[i]);
+    }
+  }
+}
+
+export { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision, testCollisionWithBricks }
 

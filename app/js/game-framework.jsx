@@ -1,12 +1,15 @@
-import { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision } from './collision-detection';
+import { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision, testCollisionWithBricks } from './collision-detection';
 import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
-import { distanceBettweenToPoints, angleBetween2Lines, calcDistanceToMove } from './math-utils';
+import { distanceBettweenToPoints, angleBetween2Lines, calcDistanceToMove, msToSeconds } from './math-utils';
 import canvasData from './canvas-data';
 import Ball from './classes/ball';
 import Brick from './classes/brick';
 import SquareBrick from './classes/square-brick';
 import Gate from './classes/gate';
 import MenuButton from './classes/menu-button';
+import Menu from './classes/menu';
+import { GAME_AREA_BORDER } from './constants';
+import { clearCanvas, updatePlayerCursor, updateGates } from './framework-functions';
 
 export default function() {
   // Vars relative to the canvas
@@ -49,15 +52,15 @@ export default function() {
   var currentGameState = gameStates.nextLevelMenu;
   var currentLevel = 1;
 
-  var gameAreaBorder = 100; // px
-
-  var nextLevelMenubuttons = [];
+  var gameAreaBorder = GAME_AREA_BORDER;
 
   var currentBallParams = {};
 
-  var msToSeconds = function(timeMs) {
-    return timeMs / 1000;
-  }
+  var nextLevelMenu = new Menu("Level Complete!");
+  nextLevelMenu.addButton("Start Next Level", function() {}); // TODO Add Levels and next level function here
+  nextLevelMenu.addButton("Replay Current Level", function() {
+    startGame();
+  });
 
   var measureFPS = function(newTime){
 
@@ -82,11 +85,6 @@ export default function() {
     frameCount++;
   };
 
-   // clears the canvas content
-   function clearCanvas() {
-     ctx.clearRect(0, 0, w, h);
-   }
-
   function updateBalls() {
     // Move and draw each ball, test collisions,
     for (var i = 0; i < ballArray.length; i++) {
@@ -98,29 +96,13 @@ export default function() {
       // 2) test if the ball collides with a wall
       testCollisionWithWalls(w, h, gameAreaBorder, ball);
 
-      testCollisionWithBricks(ball);
+      testCollisionWithBricks(bricksArray, ball);
 
       testGateHits(ball);
 
       // 3) draw the ball
       ball.draw(ctx);
     }
-  }
-
-  function updatePlayerCursor() {
-    // The player is just a circle, drawn at the mouse position
-    // Just to test circle/circle collision.
-
-    if(inputStates.mousePos) {
-      player.x = inputStates.mousePos.x;
-      player.y = inputStates.mousePos.y;
-
-       // draws a circle
-      // ctx.beginPath();
-      // ctx.arc(player.x, player.y, player.boundingCircleRadius, 0, 2*Math.PI);
-      // ctx.stroke();
-    }
-
   }
 
   function checkBallControllable() {
@@ -204,39 +186,33 @@ export default function() {
     ctx.restore();
   }
 
-  function testCollisionWithBricks(ball) {
-    for (var i = 0; i < bricksArray.length; i ++) {
-      if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
-        resetBallAfterBrickCollision(ball, bricksArray[i]);
-      }
-    }
-  }
-
   function createMainBall(x, y) {
     ballArray = [];
     var ball = new Ball(x, y, Math.PI/2, 1, 20, "player");
     ballArray[0] = ball;
   }
 
-  function createBalls(numberOfBalls) {
-      // Start from an empty array
-      ballArray = [];
+  // TODO This might be used later at some levels
+  // function createBalls(numberOfBalls) {
+  //     // Start from an empty array
+  //     ballArray = [];
 
-      for (var i = 0; i < numberOfBalls; i++) {
-          // Create a ball with random position and speed.
-          // You can change the radius
-          var ball = new Ball(w * Math.random(),
-                  h * Math.random(),
-                  (2 * Math.PI) * Math.random(),
-                  (100),
-                  15);
+  //     for (var i = 0; i < numberOfBalls; i++) {
+  //         // Create a ball with random position and speed.
+  //         // You can change the radius
+  //         var ball = new Ball(w * Math.random(),
+  //                 h * Math.random(),
+  //                 (2 * Math.PI) * Math.random(),
+  //                 (100),
+  //                 15);
 
 
-          ballArray[i] = ball;
+  //         ballArray[i] = ball;
 
-      }
-  }
+  //     }
+  // }
 
+  // This shoud use data from current Level object
   function createBricks() {
     bricksArray.push(new SquareBrick(w/2 - 25, (h/2 - 25), 50, "Grey"));
     bricksArray.push(new SquareBrick(w/2 + 70, (h/2 + 190), 30, "Orange"));
@@ -275,12 +251,6 @@ export default function() {
     return gatesArray;
   }
 
-  function updateGates() {
-    for (var i = 0; i < gatesArray.length; i++) {
-      gatesArray[i].draw();
-    }
-  }
-
   function testGateHits(ball) {
     for (var i = 0; i < gatesArray.length; i++) {
       if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
@@ -296,47 +266,6 @@ export default function() {
     var delta = currentTime - oldTime;
     oldTime = currentTime;
     return delta;
-
-  }
-
-  function createNextLevelMenu() {
-    var buttonWidth = 390, buttonHeight = 50;
-    var nextLevelButton = new MenuButton(w/2 - 195, gameAreaBorder + 55, buttonWidth, buttonHeight, "Start Next Level");
-    var replayCurrentLevelButton = new MenuButton(w/2 - 195, gameAreaBorder + 108, buttonWidth, buttonHeight, "Replay Current Level");
-    replayCurrentLevelButton.releaseHandler = function() {
-      startGame();
-    }
-    nextLevelMenubuttons = [nextLevelButton, replayCurrentLevelButton];
-  }
-
-  function drawNextLevelMenu(buttons) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.fillStyle="#33CC33";
-    ctx.font = "70px Arial";
-    ctx.fillText("Level " + currentLevel+ " Complete!", 35, 70);
-    ctx.rect(w/2 - 200, gameAreaBorder + 50, 400, 400);
-    ctx.strokeStyle = "grey";
-    ctx.lineWidth = 5;
-    ctx.stroke();
-    ctx.restore();
-
-
-    for(var i=0; i < buttons.length; i++) {
-      buttons[i].draw();
-      // Draw button that was selected by user
-      if ((player.x && player.y) && circRectsOverlap(buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h, player.x, player.y, 1)) {
-        buttons[i].drawSelection();
-
-        if (inputStates.mouseDownPos && (inputStates.mouseDownPos.x == player.x && inputStates.mouseDownPos.y == player.y)) {
-          buttons[i].click();
-        }
-
-        if (inputStates.mouseUpPos && (inputStates.mouseUpPos.x == player.x && inputStates.mouseUpPos.y == player.y)) {
-          buttons[i].release();
-        }
-      }
-    }
   }
 
   var mainLoop = function(time){
@@ -348,16 +277,16 @@ export default function() {
       delta = timer(time);
 
       // Clear the canvas
-      clearCanvas();
+      clearCanvas(ctx, canvas)
 
       drawGameAreaBorder();
 
-      updatePlayerCursor();
+      updatePlayerCursor(player, inputStates);
 
       switch (currentGameState) {
         case gameStates.gameRunning:
 
-          updateGates();
+          updateGates(gatesArray);
 
           updateBricks();
           // Update balls positions
@@ -375,7 +304,8 @@ export default function() {
           // TODO Add UI menu
           break;
         case gameStates.nextLevelMenu:
-          drawNextLevelMenu(nextLevelMenubuttons);
+          nextLevelMenu.title = "Level " + currentLevel + " Complete!";
+          nextLevelMenu.draw(player, inputStates);
           break;
         case gameStates.gameOver:
           ctx.save();
@@ -405,14 +335,15 @@ export default function() {
 
 
   function getMousePos(evt) {
-      // necessary to take into account CSS boudaries
-      var rect = canvas.getBoundingClientRect();
-      return {
-          x: evt.clientX - rect.left,
-          y: evt.clientY - rect.top
-      };
+    // necessary to take into account CSS boudaries
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
   }
 
+  // TODO This should load current level and start game.
   function startGame() {
     ballArray = [];
     bricksArray = [];
@@ -425,82 +356,73 @@ export default function() {
 
   var start = function(){
 
-      // adds a div for displaying the fps value
-      fpsContainer = document.createElement('div');
-      document.body.appendChild(fpsContainer);
+    // adds a div for displaying the fps value
+    fpsContainer = document.createElement('div');
+    document.body.appendChild(fpsContainer);
 
-      telemetryContainer = document.createElement('div');
-      document.body.appendChild(telemetryContainer);
+    telemetryContainer = document.createElement('div');
+    document.body.appendChild(telemetryContainer);
 
-      // Canvas, context etc.
+    // Canvas, context etc.
+    canvas = canvasData.getCanvas();
 
-      canvas = canvasData.getCanvas();
+    // often useful
+    w = canvas.width;
+    h = canvas.height;
 
-
-      // canvas = document.querySelector("#myCanvas");
-
-      // often useful
-      w = canvas.width;
-      h = canvas.height;
-
-      // important, we will draw with this object
-      ctx = canvasData.getContext2D();
-      //ctx = canvas.getContext('2d');
-      // default police for text
-      ctx.font="20px Arial";
-
+    // important, we will draw with this object
+    ctx = canvasData.getContext2D();
+    //ctx = canvas.getContext('2d');
+    // default police for text
+    ctx.font="20px Arial";
 
     // add the listener to the main, window object, and update the states
     window.addEventListener('keydown', function(event){
-        if (event.keyCode === 37) {
-           inputStates.left = true;
-        } else if (event.keyCode === 38) {
-           inputStates.up = true;
-        } else if (event.keyCode === 39) {
-           inputStates.right = true;
-        } else if (event.keyCode === 40) {
-           inputStates.down = true;
-        }  else if (event.keyCode === 32) {
-           inputStates.space = true;
-        }
+      if (event.keyCode === 37) {
+         inputStates.left = true;
+      } else if (event.keyCode === 38) {
+         inputStates.up = true;
+      } else if (event.keyCode === 39) {
+         inputStates.right = true;
+      } else if (event.keyCode === 40) {
+         inputStates.down = true;
+      }  else if (event.keyCode === 32) {
+         inputStates.space = true;
+      }
     }, false);
 
     //if the key will be released, change the states object
     window.addEventListener('keyup', function(event){
-        if (event.keyCode === 37) {
-           inputStates.left = false;
-        } else if (event.keyCode === 38) {
-           inputStates.up = false;
-        } else if (event.keyCode === 39) {
-           inputStates.right = false;
-        } else if (event.keyCode === 40) {
-           inputStates.down = false;
-        } else if (event.keyCode === 32) {
-           inputStates.space = false;
-        }
+      if (event.keyCode === 37) {
+         inputStates.left = false;
+      } else if (event.keyCode === 38) {
+         inputStates.up = false;
+      } else if (event.keyCode === 39) {
+         inputStates.right = false;
+      } else if (event.keyCode === 40) {
+         inputStates.down = false;
+      } else if (event.keyCode === 32) {
+         inputStates.space = false;
+      }
     }, false);
 
     // Mouse event listeners
     canvas.addEventListener('mousemove', function (evt) {
-        inputStates.mousePos = getMousePos(evt);
+      inputStates.mousePos = getMousePos(evt);
     }, false);
 
     canvas.addEventListener('mousedown', function (evt) {
-          inputStates.mousedown = true;
-          inputStates.mouseButton = evt.button;
-          inputStates.mouseDownPos = getMousePos(evt);
-          inputStates.mouseUpPos = null;
+      inputStates.mousedown = true;
+      inputStates.mouseButton = evt.button;
+      inputStates.mouseDownPos = getMousePos(evt);
+      inputStates.mouseUpPos = null;
     }, false);
 
     canvas.addEventListener('mouseup', function (evt) {
-        inputStates.mousedown = false;
-        inputStates.mouseDownPos = null; // clean mouse down position
-        inputStates.mouseUpPos = getMousePos(evt);
+      inputStates.mousedown = false;
+      inputStates.mouseDownPos = null; // clean mouse down position
+      inputStates.mouseUpPos = getMousePos(evt);
     }, false);
-
-
-    // create Menu buttons
-    createNextLevelMenu();
 
     startGame();
 
@@ -510,7 +432,7 @@ export default function() {
 
   //our GameFramework returns a public API visible from outside its scope
   return {
-      start: start
+    start: start
   };
 
 };

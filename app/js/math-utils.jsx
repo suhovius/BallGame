@@ -47,4 +47,10 @@ function calcDistanceToMove(delta, speed) {
   return (speed * delta) / 1000;
 }
 
-export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove }
+function msToSeconds(timeMs) {
+  return timeMs / 1000;
+}
+
+
+
+export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds }

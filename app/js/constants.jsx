@@ -6,5 +6,6 @@
 // 9.8 * 1000 mm / (1000 ms * 1000 ms)
 // 9.8 * 1000 / ( 1000 * 1000 ) =0.0098 px/ms2
 const GRAVITY_ACCELERATION = 0.098;
+const GAME_AREA_BORDER = 100; // px
 
-export { GRAVITY_ACCELERATION }
+export { GRAVITY_ACCELERATION, GAME_AREA_BORDER }
