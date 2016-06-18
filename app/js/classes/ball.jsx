@@ -18,6 +18,7 @@ export default class Ball extends Graphical {
     this.hitAngle = 0;
     this.hits = [];
     this.role = role;
+    this.newParams = {};
   }
 
   draw() {

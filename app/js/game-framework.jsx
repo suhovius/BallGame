@@ -211,7 +211,7 @@ export default function() {
           // Update balls positions
           updateBalls();
 
-          checkBallControllable(ballArray, player, inputStates, powerBoost, currentBallParams, ctx);
+          checkBallControllable(ballArray, player, inputStates, powerBoost, ctx);
 
           // drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
           // drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);

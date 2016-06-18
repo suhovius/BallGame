@@ -45,7 +45,7 @@ function drawGameAreaBorder(ctx, canvas) {
 }
 
 
-function checkBallControllable(ballArray, player, inputStates, powerBoost, currentBallParams, ctx) {
+function checkBallControllable(ballArray, player, inputStates, powerBoost, ctx) {
   for (var i = 0; i < ballArray.length; i++) {
     var ball = ballArray[i];
 
@@ -58,15 +58,13 @@ function checkBallControllable(ballArray, player, inputStates, powerBoost, curre
 
       if(inputStates.mousedown) {
 
-        ctx.fillText("DOWN", 200, 85);
-
         var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
         if (powerInit > 100) {
           powerInit = 100;
         }
         var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
 
-        currentBallParams = {
+        ball.newParams = {
           angle: Math.PI + angle,
           v: powerInit * powerBoost,
           isSet: true
@@ -74,7 +72,7 @@ function checkBallControllable(ballArray, player, inputStates, powerBoost, curre
 
         ctx.save();
         ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 10, 20);
-        ctx.fillText("Speed: " + currentBallParams.v.toFixed(2), 10, 45);
+        ctx.fillText("Speed: " + ball.newParams.v.toFixed(2), 10, 45);
         ctx.fillText("Power: " + powerInit.toFixed(2), 10, 65);
         ctx.fillText("Boost: " + powerBoost.toFixed(2), 10, 85);
         ctx.beginPath();
@@ -104,22 +102,10 @@ function checkBallControllable(ballArray, player, inputStates, powerBoost, curre
       }
     }
 
-    if (!inputStates.mousedown) {
-      ctx.fillText("UP", 200, 85);
-    }
-
-    if (currentBallParams.isSet) {
-      ctx.fillText("SET", 300, 85);
-    }
-
-    ctx.fillText("RES " + (currentBallParams.isSet && !inputStates.mousedown), 300, 85);
-
-
-    if (currentBallParams.isSet && !inputStates.mousedown) {
-      ctx.fillText("UP+SET", 350, 85);
-      ball.angle  = currentBallParams.angle;
-      ball.v = currentBallParams.v;
-      currentBallParams.isSet = false;
+    if (ball.newParams.isSet && !inputStates.mousedown) {
+      ball.angle  = ball.newParams.angle;
+      ball.v = ball.newParams.v;
+      ball.newParams.isSet = false;
     }
 
   }
