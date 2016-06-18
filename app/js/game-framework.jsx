@@ -9,7 +9,7 @@ import Gate from './classes/gate';
 import MenuButton from './classes/menu-button';
 import Menu from './classes/menu';
 import { GAME_AREA_BORDER } from './constants';
-import { clearCanvas, updatePlayerCursor, updateGates } from './framework-functions';
+import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable } from './framework-functions';
 
 export default function() {
   // Vars relative to the canvas
@@ -34,6 +34,8 @@ export default function() {
   var bricksArray = [];
   var gatesArray = [];
 
+  var currentBallParams = {};
+
   var player = {
     x:0,
     y:0,
@@ -53,8 +55,6 @@ export default function() {
   var currentLevel = 1;
 
   var gameAreaBorder = GAME_AREA_BORDER;
-
-  var currentBallParams = {};
 
   var nextLevelMenu = new Menu("Level Complete!");
   nextLevelMenu.addButton("Start Next Level", function() {}); // TODO Add Levels and next level function here
@@ -103,87 +103,6 @@ export default function() {
       // 3) draw the ball
       ball.draw(ctx);
     }
-  }
-
-  function checkBallControllable() {
-    for (var i = 0; i < ballArray.length; i++) {
-        var ball = ballArray[i];
-
-        if (circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
-          ball.drawSelection();
-        }
-
-        if (ball.isInLaunchPosition() && inputStates.mouseDownPos && circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
-          ball.drawSelection();
-
-          if(inputStates.mousedown) {
-
-            var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
-            if (powerInit > 100) {
-              powerInit = 100;
-            }
-            var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
-
-            currentBallParams = {
-              angle: Math.PI + angle,
-              v: powerInit * powerBoost,
-              isSet: true
-            };
-
-            ctx.save();
-            ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 10, 20);
-            ctx.fillText("Speed: " + currentBallParams.v.toFixed(2), 10, 45);
-            ctx.fillText("Power: " + powerInit.toFixed(2), 10, 65);
-            ctx.fillText("Boost: " + powerBoost.toFixed(2), 10, 85);
-            ctx.beginPath();
-            ctx.strokeStyle = 'LightGreen';
-            ctx.lineWidth = 3;
-            ctx.moveTo(ball.x, ball.y);
-            ctx.lineTo(ball.x + powerInit * Math.cos(2*Math.PI+angle), ball.y + powerInit * Math.sin(2*Math.PI+angle));
-            ctx.lineTo(ball.x - 500 * Math.cos(2*Math.PI+angle), ball.y - 500 * Math.sin(2*Math.PI+angle));
-            // ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
-            ctx.stroke();
-            // ctx.beginPath();
-            // ctx.strokeStyle = 'BlueViolet';
-            // ctx.fillStyle = 'BlueViolet';
-            // ctx.moveTo(ball.x, 0);
-            // ctx.lineTo(ball.x, h);
-            // ctx.stroke();
-            // ctx.moveTo(0, ball.y);
-            // ctx.lineTo(w, ball.y);
-            // ctx.stroke();
-            // ctx.fillText("0", w-25, ball.y+25);
-            // ctx.fillText("90", ball.x-30, h-25);
-            // ctx.fillText("180", 25, ball.y-25);
-            // ctx.fillText("270", ball.x+25, 50);
-            // ctx.fillStyle = 'Black';
-
-            ctx.restore();
-          }
-        }
-
-        if (currentBallParams.isSet && !inputStates.mousedown) {
-          ball.angle  = currentBallParams.angle;
-          ball.v = currentBallParams.v;
-          currentBallParams.isSet = false;
-        }
-
-    }
-  }
-
-  function drawGameAreaBorder() {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, w, gameAreaBorder);
-    ctx.rect(0, h-gameAreaBorder, w, gameAreaBorder);
-    ctx.rect(0, gameAreaBorder, gameAreaBorder, h-2*gameAreaBorder);
-    ctx.rect(w-gameAreaBorder, gameAreaBorder, w-gameAreaBorder, h-2*gameAreaBorder);
-    ctx.fillStyle = "#707070";
-    ctx.fill();
-    ctx.strokeStyle = "#383838";
-    ctx.rect(gameAreaBorder,gameAreaBorder,w - 2*gameAreaBorder,h - 2*gameAreaBorder);
-    ctx.stroke();
-    ctx.restore();
   }
 
   function createMainBall(x, y) {
@@ -279,7 +198,7 @@ export default function() {
       // Clear the canvas
       clearCanvas(ctx, canvas)
 
-      drawGameAreaBorder();
+      drawGameAreaBorder(ctx, canvas);
 
       updatePlayerCursor(player, inputStates);
 
@@ -292,7 +211,7 @@ export default function() {
           // Update balls positions
           updateBalls();
 
-          checkBallControllable();
+          checkBallControllable(ballArray, player, inputStates, powerBoost, currentBallParams, ctx);
 
           // drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
           // drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);
