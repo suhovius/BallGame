@@ -8,6 +8,7 @@ import SquareBrick from './classes/square-brick';
 import Gate from './classes/gate';
 import MenuButton from './classes/menu-button';
 import Menu from './classes/menu';
+import Level from './classes/level';
 import { GAME_AREA_BORDER } from './constants';
 import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable } from './framework-functions';
 
@@ -133,29 +134,7 @@ export default function() {
 
   // This shoud use data from current Level object
   function createBricks() {
-    bricksArray.push(new SquareBrick(w/2 - 25, (h/2 - 25), 50, "Grey"));
-    bricksArray.push(new SquareBrick(w/2 + 70, (h/2 + 190), 30, "Orange"));
-    bricksArray.push(new SquareBrick(w/2 + 101, (h/2 + 160), 30, "Green"));
-    bricksArray.push(new SquareBrick(w/2 + 131, (h/2 + 130), 30, "Purple"));
-    bricksArray.push(new SquareBrick(w/2 + 161, (h/2 + 100), 30, "#CC3399"));
-    bricksArray.push(new SquareBrick(w/2 + 191, (h/2 + 219), 30, "#00CC33"));
-
-    bricksArray.push(new SquareBrick(w/2 - 70, (h/2 - 50), 30, "Orange"));
-    bricksArray.push(new SquareBrick(w/2 - 101, (h/2 + 100), 30, "Green"));
-    bricksArray.push(new SquareBrick(w/2 - 131, (h/2 - 100), 30, "Purple"));
-    bricksArray.push(new SquareBrick(w/2 - 161, (h/2 + 150), 30, "#CC3399"));
-
-    bricksArray.push(new SquareBrick(w - gameAreaBorder - 100, gameAreaBorder + 30, 30, "#00CC33"));
-
-    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 30), 300, 20, "#0099FF"));
-
-    //bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 100), 150, 50, "#CCFF99"));
-
-//    bricksArray.push(new Brick(gameAreaBorder + 350, (gameAreaBorder + 250), 100, 20, "#0099FF"));
-
-    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 52), 20, 380, "#0099FF"));
-
-    bricksArray.push(new Brick(gameAreaBorder + 30, (gameAreaBorder + 480), 20, 20, "#0099FF"));
+    bricksArray = new Level(currentLevel).loadBricks();
   }
 
   function updateBricks() {
