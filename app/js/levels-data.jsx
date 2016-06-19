@@ -78,6 +78,19 @@ export default function levelsData(level) {
         startGateParams((w-GAME_AREA_BORDER-15), (h-GAME_AREA_BORDER-10)),
         finishGateParams((GAME_AREA_BORDER+15), (GAME_AREA_BORDER+15))
       ]
+    },
+    {
+      "bricks" : [
+
+      ],
+      "square_bricks" : [
+
+      ],
+      "gates" : [
+        startGateParams((w/2), (h/2 + 30)),
+        finishGateParams((w/2), (h/2 - 30))
+      ]
     }
+
   ][level-1];
 }
