@@ -21,6 +21,8 @@ export default class Level {
   }
 
   loadGates() {
-    levelsData(this.number)["gates"]
+    return levelsData(this.number)["gates"].map(function(gate_args) {
+      return new Gate(...gate_args);
+    });
   }
 }

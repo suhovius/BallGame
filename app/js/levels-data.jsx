@@ -29,7 +29,8 @@ export default function levelsData(level) {
          [w - GAME_AREA_BORDER - 100, GAME_AREA_BORDER + 30, 30, "#00CC33"]
       ],
       "gates" : [
-
+        [w/2, (h-GAME_AREA_BORDER-10), 23, "A", "#A8A8A8", "start"],
+        [(w-GAME_AREA_BORDER-15), (GAME_AREA_BORDER+15), 23, "Z", "#009900", "finish"]
       ]
     }
   ][level-1];

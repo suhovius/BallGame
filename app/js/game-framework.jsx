@@ -53,7 +53,7 @@ export default function() {
   };
   // var currentGameState = gameStates.gameRunning;
   var currentGameState = gameStates.nextLevelMenu;
-  var currentLevel = 1;
+  var currentLevel = new Level(1);
 
   var gameAreaBorder = GAME_AREA_BORDER;
 
@@ -134,7 +134,7 @@ export default function() {
 
   // This shoud use data from current Level object
   function createBricks() {
-    bricksArray = new Level(currentLevel).loadBricks();
+    bricksArray = currentLevel.loadBricks();
   }
 
   function updateBricks() {
@@ -144,8 +144,7 @@ export default function() {
   }
 
   function createGates() {
-    gatesArray.push(new Gate(w/2, (h-gameAreaBorder-10), 23, "A", "#A8A8A8", "start"));
-    gatesArray.push(new Gate((w-gameAreaBorder-15), (gameAreaBorder+15), 23, "Z", "#009900", "finish"));
+    gatesArray = currentLevel.loadGates();
     return gatesArray;
   }
 
@@ -202,7 +201,7 @@ export default function() {
           // TODO Add UI menu
           break;
         case gameStates.nextLevelMenu:
-          nextLevelMenu.title = "Level " + currentLevel + " Complete!";
+          nextLevelMenu.title = "Level " + (currentLevel.number) + " Complete!";
           nextLevelMenu.draw(player, inputStates);
           break;
         case gameStates.gameOver:
