@@ -46,6 +46,11 @@ export default function levelsData(level) {
         [w - GAME_AREA_BORDER - 120, (GAME_AREA_BORDER + 50), 20, 450, "#600080"],
         [w - GAME_AREA_BORDER - 200, (GAME_AREA_BORDER), 20, 300, "#cc5200"],
         [GAME_AREA_BORDER, (GAME_AREA_BORDER + 30), 250, 20, "#6600cc"],
+
+        [GAME_AREA_BORDER + 120, (GAME_AREA_BORDER + 52), 20, 54, "#0080ff"],
+        [GAME_AREA_BORDER + 178, (GAME_AREA_BORDER + 86), 50, 20, "#0080ff"],
+        [GAME_AREA_BORDER + 230, (GAME_AREA_BORDER + 52), 20, 54, "#0080ff"],
+
         [GAME_AREA_BORDER + 73, (GAME_AREA_BORDER + 140), 225, 20, "#6600cc"],
         [GAME_AREA_BORDER, (GAME_AREA_BORDER + 250), 250, 20, "#e6e600"],
         [GAME_AREA_BORDER + 50, (GAME_AREA_BORDER+100), 20, 100, "#39e600"],
@@ -53,8 +58,7 @@ export default function levelsData(level) {
         [w - GAME_AREA_BORDER - 100, (GAME_AREA_BORDER + 120), 50, 30, "#ffcc00"],
         [w - GAME_AREA_BORDER - 50, (GAME_AREA_BORDER + 210), 50, 30, "#0066cc"],
         [w - GAME_AREA_BORDER - 100, (GAME_AREA_BORDER + 300), 50, 30, "#ffcc00"],
-        [w - GAME_AREA_BORDER - 50, (GAME_AREA_BORDER + 390), 50, 30, "#0066cc"],
-
+        [w - GAME_AREA_BORDER - 50, (GAME_AREA_BORDER + 390), 50, 30, "#0066cc"]
       ],
       "square_bricks" : [
         [GAME_AREA_BORDER + 20, (GAME_AREA_BORDER + 350), 30, "#ff6699"],
@@ -65,11 +69,10 @@ export default function levelsData(level) {
         [GAME_AREA_BORDER + 142, (GAME_AREA_BORDER + 420), 30, "#e6004c"],
         [GAME_AREA_BORDER + 222, (GAME_AREA_BORDER + 420), 30, "#ff6699"],
         [GAME_AREA_BORDER + 302, (GAME_AREA_BORDER + 420), 30, "#e6004c"],
-
         [w - GAME_AREA_BORDER - 153, (GAME_AREA_BORDER + 50), 30, "#00e673"],
         [w - GAME_AREA_BORDER - 153, (GAME_AREA_BORDER + 150), 30, "#00e673"],
         [w - GAME_AREA_BORDER - 153, (GAME_AREA_BORDER + 250), 30, "#00e673"],
-        [w - GAME_AREA_BORDER - 153, (GAME_AREA_BORDER + 350), 30, "#00e673"],
+        [w - GAME_AREA_BORDER - 153, (GAME_AREA_BORDER + 350), 30, "#00e673"]
       ],
       "gates" : [
         startGateParams((w-GAME_AREA_BORDER-15), (h-GAME_AREA_BORDER-10)),
