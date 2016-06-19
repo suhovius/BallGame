@@ -58,7 +58,12 @@ export default function() {
   var gameAreaBorder = GAME_AREA_BORDER;
 
   var nextLevelMenu = new Menu("Level Complete!");
-  nextLevelMenu.addButton("Start Next Level", function() {}); // TODO Add Levels and next level function here
+  nextLevelMenu.addButton("Start Next Level", function() {
+    if (currentLevel.hasNextLevel()) {
+      currentLevel = currentLevel.getNextLevel();
+      startGame();
+    }
+  });
   nextLevelMenu.addButton("Replay Current Level", function() {
     startGame();
   });
@@ -132,20 +137,10 @@ export default function() {
   //     }
   // }
 
-  // This shoud use data from current Level object
-  function createBricks() {
-    bricksArray = currentLevel.loadBricks();
-  }
-
   function updateBricks() {
     for (var i = 0; i < bricksArray.length; i++) {
       bricksArray[i].draw();
     }
-  }
-
-  function createGates() {
-    gatesArray = currentLevel.loadGates();
-    return gatesArray;
   }
 
   function testGateHits(ball) {
@@ -243,10 +238,9 @@ export default function() {
   // TODO This should load current level and start game.
   function startGame() {
     ballArray = [];
-    bricksArray = [];
-    gatesArray = [];
-    createBricks();
-    var startGate = createGates().find(function(gate) { return gate.type === "start"; });
+    bricksArray = currentLevel.loadBricks();
+    gatesArray = currentLevel.loadGates();
+    var startGate = gatesArray.find(function(gate) { return gate.type === "start"; });
     createMainBall(startGate.x, startGate.y);
     currentGameState = gameStates.gameRunning;
   }

@@ -25,4 +25,14 @@ export default class Level {
       return new Gate(...gate_args);
     });
   }
+
+  hasNextLevel() {
+    return !!levelsData(this.number+1);
+  }
+
+  getNextLevel() {
+    if (this.hasNextLevel()) {
+      return new Level(this.number+1);
+    }
+  }
 }

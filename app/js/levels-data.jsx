@@ -1,6 +1,14 @@
 import { GAME_AREA_BORDER } from './constants';
 import canvasData from './canvas-data';
 
+function startGateParams(x, y) {
+  return [x, y, 23, "A", "#A8A8A8", "start"];
+}
+
+function finishGateParams(x, y) {
+  return [x, y, 23, "Z", "#009900", "finish"];
+}
+
 export default function levelsData(level) {
   let canvas = canvasData.getCanvas();
   let w = canvas.width;
@@ -29,8 +37,18 @@ export default function levelsData(level) {
          [w - GAME_AREA_BORDER - 100, GAME_AREA_BORDER + 30, 30, "#00CC33"]
       ],
       "gates" : [
-        [w/2, (h-GAME_AREA_BORDER-10), 23, "A", "#A8A8A8", "start"],
-        [(w-GAME_AREA_BORDER-15), (GAME_AREA_BORDER+15), 23, "Z", "#009900", "finish"]
+        startGateParams(w/2, (h-GAME_AREA_BORDER-10)),
+        finishGateParams((w-GAME_AREA_BORDER-15), (GAME_AREA_BORDER+15))
+      ]
+    },
+    {
+      "bricks" : [
+      ],
+      "square_bricks" : [
+      ],
+      "gates" : [
+        startGateParams((w-GAME_AREA_BORDER-15), (h-GAME_AREA_BORDER-10)),
+        finishGateParams((GAME_AREA_BORDER+15), (GAME_AREA_BORDER+15))
       ]
     }
   ][level-1];
