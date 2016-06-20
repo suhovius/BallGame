@@ -40,6 +40,15 @@ export default function() {
     "totalScore" : 0
   };
 
+  playerStats.calculateTotalScore = function() {
+    this.totalScore = 0;
+    for (var number in playerStats["levels"]) {
+      this.totalScore += playerStats["levels"][number]["score_points"].reduce(function(sum, score) { return sum + score.weight;}, 0);
+    }
+    playerStats["levels"][currentLevel.number]["totalScore"] = playerStats["levels"][currentLevel.number]["score_points"].reduce(function(sum, score) { return sum + score.weight;}, 0);
+    return this.totalScore;
+  };
+
   var player = {
     x:0,
     y:0,
@@ -64,10 +73,13 @@ export default function() {
   nextLevelMenu.addButton("Start Next Level", function() {
     if (currentLevel.hasNextLevel()) {
       currentLevel = currentLevel.getNextLevel();
+      playerStats.calculateTotalScore();
       startGame();
     }
   });
   nextLevelMenu.addButton("Replay Current Level", function() {
+    playerStats["levels"][currentLevel.number]["score_points"] = [];
+
     startGame();
   });
 
@@ -112,8 +124,8 @@ export default function() {
       scorePointsArray = result["available"];
 
       if (result["collected"].length > 0) {
-        playerStats["totalScore"] += result["collected"].reduce(function(sum, score) { return sum + score.weight;}, 0);
-        playerStats["levels"][currentLevel.number]["score_points"].concat(result["collected"]);
+        playerStats["levels"][currentLevel.number]["score_points"] = playerStats["levels"][currentLevel.number]["score_points"].concat(result["collected"]);
+        playerStats.calculateTotalScore();
       }
 
       testGateHits(ball);
@@ -163,6 +175,7 @@ export default function() {
 
   function updateStats() {
     ctx.save();
+    ctx.fillText("Level Score: " + playerStats["levels"][currentLevel.number]["totalScore"], 200, 20);
     ctx.fillText("Total Score: " + playerStats.totalScore, 200, 45);
     ctx.restore();
   }
@@ -272,7 +285,8 @@ export default function() {
     var startGate = gatesArray.find(function(gate) { return gate.type === "start"; });
     createMainBall(startGate.x, startGate.y);
     playerStats["levels"][currentLevel.number] = {
-      "score_points" : []
+      "score_points" : [],
+      "totalScore" : 0
     }
     currentGameState = gameStates.gameRunning;
   }
