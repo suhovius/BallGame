@@ -73,13 +73,12 @@ export default function() {
   nextLevelMenu.addButton("Start Next Level", function() {
     if (currentLevel.hasNextLevel()) {
       currentLevel = currentLevel.getNextLevel();
-      playerStats.calculateTotalScore();
       startGame();
     }
   });
   nextLevelMenu.addButton("Replay Current Level", function() {
     playerStats["levels"][currentLevel.number]["score_points"] = [];
-
+    playerStats.calculateTotalScore();
     startGame();
   });
 
