@@ -10,17 +10,25 @@ export default class Level {
   }
 
   loadBricks() {
-    let bricks = levelsData(this.number)["bricks"].map(function(brick_args) {
-      return new Brick(...brick_args);
-    });
+    let bricks = [], squareBricks = [], breakableBricks = [];
 
-    let squareBricks = levelsData(this.number)["square_bricks"].map(function(brick_args) {
-      return new SquareBrick(...brick_args);
-    });
+    if (levelsData(this.number)["bricks"]) {
+      bricks = levelsData(this.number)["bricks"].map(function(brick_args) {
+        return new Brick(...brick_args);
+      });
+    }
 
-    let breakableBricks = levelsData(this.number)["breakable_bricks"].map(function(brick_args) {
-      return new BreakableBrick(...brick_args);
-    });
+    if (levelsData(this.number)["square_bricks"]) {
+      squareBricks = levelsData(this.number)["square_bricks"].map(function(brick_args) {
+        return new SquareBrick(...brick_args);
+      });
+    }
+
+    if (levelsData(this.number)["breakable_bricks"]) {
+      breakableBricks = levelsData(this.number)["breakable_bricks"].map(function(brick_args) {
+        return new BreakableBrick(...brick_args);
+      });
+    }
 
     return bricks.concat(squareBricks).concat(breakableBricks);
   }
