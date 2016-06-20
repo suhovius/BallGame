@@ -83,7 +83,10 @@ function resetBallAfterBrickCollision(ball, brick) {
   var sides =  ballBrickCollisionSides(ball, brick);
 
   // console.log(sides);
-  brick.drawCollision(sides);
+  if (ball.v > 0) {
+    brick.drawCollision(sides);
+  }
+
   // 45 degree collision with brick's facet
   // if (sides.length == 2) {
   //   // var offset = ball.radius / Math.sqrt(2); // Pythagorean theorem https://en.wikipedia.org/wiki/Pythagorean_theorem

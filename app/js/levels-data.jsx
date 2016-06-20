@@ -81,10 +81,31 @@ export default function levelsData(level) {
     },
     {
       "bricks" : [
-
+        [GAME_AREA_BORDER + 150, (GAME_AREA_BORDER + 240), 200, 20, "#0080ff"],
+        [GAME_AREA_BORDER+130, (GAME_AREA_BORDER + 100), 20, 260, "#33cc33"],
+        [GAME_AREA_BORDER+130, (GAME_AREA_BORDER), 20, 65, "#33cc33"],
+        [GAME_AREA_BORDER+130, (h - GAME_AREA_BORDER - 65), 20, 65, "#33cc33"],
+        [GAME_AREA_BORDER+352, (GAME_AREA_BORDER + 100), 20, 377, "#33cc33"],
+        [GAME_AREA_BORDER+352, (GAME_AREA_BORDER), 20, 65, "#33cc33"],
+        [GAME_AREA_BORDER, (h - GAME_AREA_BORDER - 65), 100, 20, "#00cc66"]
       ],
       "square_bricks" : [
+        [w/2 - 15, (GAME_AREA_BORDER + 295), 30, "#33cc33"],
+        [w/2 + 58, (GAME_AREA_BORDER + 480), 20, "#e6004c"],
+        [w/2, (GAME_AREA_BORDER + 480), 20, "#e6004c"],
+        [w/2 - 60, (GAME_AREA_BORDER + 480), 20, "#e6004c"],
 
+        [w/2 + 58, (GAME_AREA_BORDER + 435), 20, "#e6004c"],
+        [w/2, (GAME_AREA_BORDER + 435), 20, "#e6004c"],
+        [w/2 - 60, (GAME_AREA_BORDER + 435), 20, "#e6004c"],
+
+        [w/2 + 58, (GAME_AREA_BORDER + 388), 20, "#e6004c"],
+        [w/2, (GAME_AREA_BORDER + 388), 20, "#e6004c"],
+        [w/2 - 60, (GAME_AREA_BORDER + 388), 20, "#e6004c"],
+
+        [GAME_AREA_BORDER + 98, (GAME_AREA_BORDER + 290), 30, "#ffff00"],
+        [GAME_AREA_BORDER+50, (GAME_AREA_BORDER + 190), 30, "#ffff00"],
+        [GAME_AREA_BORDER, (GAME_AREA_BORDER + 90), 30, "#ffff00"]
       ],
       "gates" : [
         startGateParams((w/2), (h/2 + 30)),
