@@ -2,6 +2,7 @@ import levelsData from '../levels-data';
 import Brick from './brick';
 import SquareBrick from './square-brick';
 import BreakableBrick from './breakable-brick';
+import ScorePoint from './score-point';
 import Gate from './gate';
 
 export default class Level {
@@ -37,6 +38,17 @@ export default class Level {
     return levelsData(this.number)["gates"].map(function(gate_args) {
       return new Gate(...gate_args);
     });
+  }
+
+  loadScorePoints() {
+    let scorePoints = []
+    if (levelsData(this.number)["score_points"]) {
+      scorePoints = levelsData(this.number)["score_points"].map(function(score_point_args) {
+        return new ScorePoint(...score_point_args);
+      });
+    }
+
+    return scorePoints;
   }
 
   hasNextLevel() {

@@ -1,6 +1,6 @@
-import { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision, testCollisionWithBricks } from './collision-detection';
+import { testCollisionWithWalls, testCollisionWithBricks, testCollisionWithScorePoints } from './collision-detection';
 import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
-import { distanceBettweenToPoints, angleBetween2Lines, calcDistanceToMove, msToSeconds } from './math-utils';
+import { distanceBettweenToPoints } from './math-utils';
 import canvasData from './canvas-data';
 import Ball from './classes/ball';
 import Brick from './classes/brick';
@@ -30,12 +30,15 @@ export default function() {
   // vars for handling inputs
   var inputStates = {};
 
-  // array of balls to animate
   var ballArray = [];
   var bricksArray = [];
   var gatesArray = [];
+  var scorePointsArray = [];
 
-  var currentBallParams = {};
+  var playerStats = {
+    "levels" : {},
+    "totalScore" : 0
+  };
 
   var player = {
     x:0,
@@ -92,6 +95,7 @@ export default function() {
   };
 
   function updateBalls() {
+    let result = {};
     // Move and draw each ball, test collisions,
     for (var i = 0; i < ballArray.length; i++) {
       var ball = ballArray[i];
@@ -103,6 +107,14 @@ export default function() {
       testCollisionWithWalls(w, h, gameAreaBorder, ball);
 
       bricksArray = testCollisionWithBricks(bricksArray, ball);
+
+      result = testCollisionWithScorePoints(scorePointsArray, ball);
+      scorePointsArray = result["available"];
+
+      if (result["collected"].length > 0) {
+        playerStats["totalScore"] += result["collected"].reduce(function(sum, score) { return sum + score.weight;}, 0);
+        playerStats["levels"][currentLevel.number]["score_points"].concat(result["collected"]);
+      }
 
       testGateHits(ball);
 
@@ -143,6 +155,18 @@ export default function() {
     }
   }
 
+  function updateScorePoints() {
+    for (var i = 0; i < scorePointsArray.length; i++) {
+      scorePointsArray[i].draw();
+    }
+  }
+
+  function updateStats() {
+    ctx.save();
+    ctx.fillText("Total Score: " + playerStats.totalScore, 200, 45);
+    ctx.restore();
+  }
+
   function testGateHits(ball) {
     for (var i = 0; i < gatesArray.length; i++) {
       if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
@@ -181,10 +205,14 @@ export default function() {
           updateGates(gatesArray);
 
           updateBricks();
+
+          updateScorePoints();
           // Update balls positions
           updateBalls();
 
           checkBallControllable(ballArray, player, inputStates, powerBoost, ctx);
+
+          updateStats();
 
           // drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
           // drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);
@@ -240,8 +268,12 @@ export default function() {
     ballArray = [];
     bricksArray = currentLevel.loadBricks();
     gatesArray = currentLevel.loadGates();
+    scorePointsArray = currentLevel.loadScorePoints();
     var startGate = gatesArray.find(function(gate) { return gate.type === "start"; });
     createMainBall(startGate.x, startGate.y);
+    playerStats["levels"][currentLevel.number] = {
+      "score_points" : []
+    }
     currentGameState = gameStates.gameRunning;
   }
 

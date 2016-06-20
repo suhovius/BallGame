@@ -179,5 +179,19 @@ function testCollisionWithBricks(bricksArray, ball) {
   return bricksArray.filter(function(brick, index) { return !removeAtIndexes.includes(index); });
 }
 
-export { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision, testCollisionWithBricks }
+function testCollisionWithScorePoints(scorePointsArray, ball) {
+  let removeAtIndexes = [];
+  for (var i = 0; i < scorePointsArray.length; i ++) {
+    if (circleCollide(scorePointsArray[i].x, scorePointsArray[i].y, scorePointsArray[i].radius, ball.x, ball.y, ball.radius)) {
+      removeAtIndexes.push(i);
+    }
+  }
+
+  return {
+    "available" : scorePointsArray.filter(function(brick, index) { return !removeAtIndexes.includes(index); }),
+    "collected" : scorePointsArray.filter(function(brick, index) { return removeAtIndexes.includes(index); })
+  };
+}
+
+export { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision, testCollisionWithBricks, testCollisionWithScorePoints }
 
