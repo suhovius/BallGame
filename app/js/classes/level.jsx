@@ -1,6 +1,7 @@
 import levelsData from '../levels-data';
 import Brick from './brick';
 import SquareBrick from './square-brick';
+import BreakableBrick from './breakable-brick';
 import Gate from './gate';
 
 export default class Level {
@@ -17,7 +18,11 @@ export default class Level {
       return new SquareBrick(...brick_args);
     });
 
-    return bricks.concat(squareBricks);
+    let breakableBricks = levelsData(this.number)["breakable_bricks"].map(function(brick_args) {
+      return new BreakableBrick(...brick_args);
+    });
+
+    return bricks.concat(squareBricks).concat(breakableBricks);
   }
 
   loadGates() {

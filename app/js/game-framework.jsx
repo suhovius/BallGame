@@ -102,7 +102,7 @@ export default function() {
       // 2) test if the ball collides with a wall
       testCollisionWithWalls(w, h, gameAreaBorder, ball);
 
-      testCollisionWithBricks(bricksArray, ball);
+      bricksArray = testCollisionWithBricks(bricksArray, ball);
 
       testGateHits(ball);
 

@@ -107,6 +107,19 @@ export default function levelsData(level) {
         [GAME_AREA_BORDER+50, (GAME_AREA_BORDER + 190), 30, "#ffff00"],
         [GAME_AREA_BORDER, (GAME_AREA_BORDER + 90), 30, "#ffff00"]
       ],
+      "breakable_bricks" : [
+        [w/2 - 65, (GAME_AREA_BORDER + 265), 20, 20, "#ffffff"],
+        [w/2 - 65, (GAME_AREA_BORDER + 295), 20, 20, "#ffffff"],
+        [w/2 - 65, (GAME_AREA_BORDER + 325), 20, 20, "#ffffff"],
+        [w/2 - 65, (GAME_AREA_BORDER + 355), 20, 20, "#ffffff"],
+        [w/2 - 35, (GAME_AREA_BORDER + 355), 20, 20, "#ffffff"],
+        [w/2 - 5, (GAME_AREA_BORDER + 355), 20, 20, "#ffffff"],
+        [w/2 + 25, (GAME_AREA_BORDER + 355), 20, 20, "#ffffff"],
+        [w/2 + 55, (GAME_AREA_BORDER + 355), 20, 20, "#ffffff"],
+        [w/2 + 55, (GAME_AREA_BORDER + 265), 20, 20, "#ffffff"],
+        [w/2 + 55, (GAME_AREA_BORDER + 295), 20, 20, "#ffffff"],
+        [w/2 + 55, (GAME_AREA_BORDER + 325), 20, 20, "#ffffff"],
+      ],
       "gates" : [
         startGateParams((w/2), (h/2 + 30)),
         finishGateParams((w/2), (h/2 - 30))

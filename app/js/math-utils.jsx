@@ -51,6 +51,17 @@ function msToSeconds(timeMs) {
   return timeMs / 1000;
 }
 
+// Taken from here http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb/12342275#12342275
+function hex2rgb(hex, opacity) {
+  var h=hex.replace('#', '');
+  h =  h.match(new RegExp('(.{'+h.length/3+'})', 'g'));
 
+  for(var i=0; i<h.length; i++)
+      h[i] = parseInt(h[i].length==1? h[i]+h[i]:h[i], 16);
 
-export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds }
+  if (typeof opacity != 'undefined')  h.push(opacity);
+
+  return 'rgba('+h.join(',')+')';
+}
+
+export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb }

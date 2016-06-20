@@ -166,11 +166,17 @@ function resetBallAfterBrickCollision(ball, brick) {
 }
 
 function testCollisionWithBricks(bricksArray, ball) {
+  let removeAtIndexes = [];
   for (var i = 0; i < bricksArray.length; i ++) {
     if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
+      if (bricksArray[i].constructor.name == "BreakableBrick") {
+        removeAtIndexes.push(i);
+      }
       resetBallAfterBrickCollision(ball, bricksArray[i]);
     }
   }
+
+  return bricksArray.filter(function(brick, index) { return !removeAtIndexes.includes(index); });
 }
 
 export { circleCollide, circRectsOverlap, testCollisionWithWalls, resetBallAfterBrickCollision, testCollisionWithBricks }
