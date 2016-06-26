@@ -37,12 +37,6 @@ export default function() {
   var scorePointsArray = [];
   var blackHolesArray = [];
 
-  var playerStats = {
-    "balls" : 3,
-    "levels" : {},
-    "totalScore" : 0
-  };
-
   const PLAYER_STATS_INIT = {
     "balls" : 3,
     "levels" : {},
@@ -50,7 +44,7 @@ export default function() {
     "levels" : {}
   };
 
-  var playerStats = PLAYER_STATS_INIT;
+  var playerStats = Object.assign({}, PLAYER_STATS_INIT);
 
   playerStats.calculateTotalScore = function() {
     this.totalScore = 0;
@@ -98,7 +92,7 @@ export default function() {
   gameOverMenu.addButton("Restart Game", function() {
     if (currentLevel.hasNextLevel()) {
       currentLevel = currentLevel = new Level(1);
-      playerStats = Object.assign({}, PLAYER_STATS_INIT);
+      playerStats = Object.assign(playerStats, PLAYER_STATS_INIT);
       startGame();
     }
   });
