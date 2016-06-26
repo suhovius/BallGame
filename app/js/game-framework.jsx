@@ -153,7 +153,8 @@ export default function() {
 
   function createMainBall(x, y) {
     ballArray = [];
-    var ball = new Ball(x, y, 0, 1, 20, "player");
+    var ball = new Ball(x, y, 20, "#FF6633", 0, 0, "player");
+
     ballArray[0] = ball;
   }
 
@@ -167,9 +168,11 @@ export default function() {
   //         // You can change the radius
   //         var ball = new Ball(w * Math.random(),
   //                 h * Math.random(),
+  //                 20,
+  //                 "#0000FF"
   //                 (2 * Math.PI) * Math.random(),
   //                 (100),
-  //                 15);
+  //                 "competitor");
 
 
   //         ballArray[i] = ball;
@@ -212,6 +215,8 @@ export default function() {
     for (var i = 0; i < blackHolesArray.length; i++) {
       if (distanceBettweenToPoints(blackHolesArray[i].x, blackHolesArray[i].y, ball.x, ball.y) < blackHolesArray[i].radius) {
         // Black Hole hit detected
+        blackHolesArray[i].setBallInside(ball);
+        blackHolesArray[i].startCollapse();
         if (ball.role === "player") {
           playerStats.balls--;
           if (playerStats.balls > 0) {
@@ -251,7 +256,7 @@ export default function() {
 
           updateGates(gatesArray);
 
-          updateBlackHoles(blackHolesArray);
+          blackHolesArray = updateBlackHoles(blackHolesArray, delta);
 
           updateBricks();
 

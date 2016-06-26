@@ -28,10 +28,16 @@ function updateGates(gatesArray) {
   }
 }
 
-function updateBlackHoles(blackHolesArray) {
+function updateBlackHoles(blackHolesArray, delta) {
+  blackHolesArray = blackHolesArray.filter(function(blackHole) { return !blackHole.isDisappeared(); })
   for (var i = 0; i < blackHolesArray.length; i++) {
+    if (blackHolesArray[i].isCollapsing()) {
+      blackHolesArray[i].collapse(delta)
+    }
     blackHolesArray[i].draw();
   }
+
+  return blackHolesArray;
 }
 
 function drawGameAreaBorder(ctx, canvas) {

@@ -1,6 +1,7 @@
 import Constants from '../constants';
 import Graphical from './graphical';
 import { hex2rgb } from '../math-utils'
+import GraphicBall from './graphic-ball';
 
 export default class BlackHole extends Graphical {
 
@@ -9,6 +10,13 @@ export default class BlackHole extends Graphical {
     this.x = x;
     this.y = y;
     this.radius = diameter / 2;
+    this.initialRadius = this.radius;
+    this.status = "active";
+    this.content = null;
+  }
+
+  collapseRate() {
+    return this.radius / this.initialRadius;
   }
 
   draw() {
@@ -29,6 +37,37 @@ export default class BlackHole extends Graphical {
     ctx.fill();
 
     ctx.restore();
+    if (this.content) {
+      this.content.radius = this.content.radius * this.collapseRate();
+      this.content.color = hex2rgb(this.content.initialColor, this.collapseRate());
+      this.content.draw();
+    }
+  }
+
+  setBallInside(ball) {
+    let innerBall = new GraphicBall(this.x, this.y, 2 * ball.radius, ball.color);
+    innerBall.initialColor = innerBall.color;
+    this.content = innerBall;
+  }
+
+  startCollapse() {
+    this.status = "collapse";
+  }
+
+  isCollapsing() {
+    return this.status == "collapse";
+  }
+
+  isDisappeared() {
+    return this.status == "disappeared";
+  }
+
+  collapse(delta) {
+    if (this.radius > 3 && this.status == "collapse") {
+      this.radius = this.radius - 0.01 * delta;
+    } else {
+      this.status = "disappeared"
+    }
   }
 
 }

@@ -1,18 +1,14 @@
-import Constants from '../constants';
-import Graphical from './graphical';
 import { calcDistanceToMove } from '../math-utils';
 import { GRAVITY_ACCELERATION } from '../constants';
+import GraphicBall from './graphic-ball';
 
-export default class Ball extends Graphical {
+export default class Ball extends GraphicBall {
 
-  constructor(x, y, angle, v, diameter, role) {
-    super();
-    this.x = x;
-    this.y = y;
+  constructor(x, y, diameter, color, angle, v, role) {
+    super(x, y, diameter, color);
+
     this.angle = angle;
     this.v = v;
-    this.radius = diameter / 2;
-    this.color = '#FF6633';
     this.runTime = 0;
     this.hitVelocity = 0;
     this.hitAngle = 0;
