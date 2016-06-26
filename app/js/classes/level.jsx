@@ -4,6 +4,7 @@ import SquareBrick from './square-brick';
 import BreakableBrick from './breakable-brick';
 import ScorePoint from './score-point';
 import Gate from './gate';
+import BlackHole from './black-hole';
 
 export default class Level {
   constructor(number) {
@@ -49,6 +50,12 @@ export default class Level {
     }
 
     return scorePoints;
+  }
+
+  loadBlackHoles() {
+    return levelsData(this.number)["black_holes"].map(function(black_hole_args) {
+      return new BlackHole(...black_hole_args);
+    });
   }
 
   hasNextLevel() {

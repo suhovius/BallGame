@@ -6,11 +6,12 @@ import Ball from './classes/ball';
 import Brick from './classes/brick';
 import SquareBrick from './classes/square-brick';
 import Gate from './classes/gate';
+import BlackHole from './classes/black-hole';
 import MenuButton from './classes/menu-button';
 import Menu from './classes/menu';
 import Level from './classes/level';
 import { GAME_AREA_BORDER } from './constants';
-import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable } from './framework-functions';
+import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles } from './framework-functions';
 
 export default function() {
   // Vars relative to the canvas
@@ -34,8 +35,10 @@ export default function() {
   var bricksArray = [];
   var gatesArray = [];
   var scorePointsArray = [];
+  var blackHolesArray = [];
 
   var playerStats = {
+    "balls" : 7,
     "levels" : {},
     "totalScore" : 0
   };
@@ -176,6 +179,7 @@ export default function() {
     ctx.save();
     ctx.fillText("Level Score: " + playerStats["levels"][currentLevel.number]["totalScore"], 200, 20);
     ctx.fillText("Total Score: " + playerStats.totalScore, 200, 45);
+    ctx.fillText("Balls: " + playerStats.balls, 200, 70);
     ctx.restore();
   }
 
@@ -215,6 +219,8 @@ export default function() {
         case gameStates.gameRunning:
 
           updateGates(gatesArray);
+
+          updateBlackHoles(blackHolesArray);
 
           updateBricks();
 
@@ -280,6 +286,7 @@ export default function() {
     ballArray = [];
     bricksArray = currentLevel.loadBricks();
     gatesArray = currentLevel.loadGates();
+    blackHolesArray = currentLevel.loadBlackHoles();
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = gatesArray.find(function(gate) { return gate.type === "start"; });
     createMainBall(startGate.x, startGate.y);

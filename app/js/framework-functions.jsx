@@ -28,6 +28,12 @@ function updateGates(gatesArray) {
   }
 }
 
+function updateBlackHoles(blackHolesArray) {
+  for (var i = 0; i < blackHolesArray.length; i++) {
+    blackHolesArray[i].draw();
+  }
+}
+
 function drawGameAreaBorder(ctx, canvas) {
   let w = canvas.width, h = canvas.height;
   ctx.save();
@@ -111,4 +117,4 @@ function checkBallControllable(ballArray, player, inputStates, powerBoost, ctx) 
   }
 }
 
-export { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable }
+export { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles }
