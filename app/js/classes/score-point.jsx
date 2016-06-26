@@ -6,6 +6,7 @@ export default class ScorePoint extends Graphical {
     this.x = x;
     this.y = y;
     this.radius = 7;
+    this.type = type;
 
     switch(type) {
     case "gold":
@@ -18,7 +19,8 @@ export default class ScorePoint extends Graphical {
       break;
     case "steel":
       this.weight = 10;
-      this.color = "#B0C4DE";
+      this.color = "#3CA7BC";
+      break;
     }
   }
 

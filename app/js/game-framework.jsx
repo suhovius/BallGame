@@ -8,6 +8,7 @@ import Brick from './classes/brick';
 import SquareBrick from './classes/square-brick';
 import Gate from './classes/gate';
 import BlackHole from './classes/black-hole';
+import ScorePoint from './classes/score-point';
 import MenuButton from './classes/menu-button';
 import Menu from './classes/menu';
 import Level from './classes/level';
@@ -39,6 +40,9 @@ export default function() {
   var blackHolesArray = [];
 
   var statsBall = new GraphicBall(20, 120, 20, "#FF6633");
+  var statsScorePointGold = new ScorePoint(15, 520, "gold");
+  var statsScorePointSilver = new ScorePoint(15, 550, "silver");
+  var statsScorePointSteel = new ScorePoint(15, 580, "steel");
 
   const PLAYER_STATS_INIT = {
     "balls" : 3,
@@ -54,8 +58,25 @@ export default function() {
 
   playerStats.calculateTotalScore = function() {
     this.totalScore = 0;
+    this.goldCount = 0;
+    this.silverCount = 0;
+    this.steelCount = 0;
     for (var number in playerStats["levels"]) {
       this.totalScore += playerStats["levels"][number]["score_points"].reduce(function(sum, score) { return sum + score.weight;}, 0);
+
+      for (let scorePoint of playerStats["levels"][number]["score_points"]) {
+        switch(scorePoint.type) {
+        case "gold":
+          this.goldCount++;
+          break;
+        case "silver":
+          this.silverCount++;
+          break;
+        case "steel":
+          this.steelCount++;
+          break;
+        }
+      }
     }
     playerStats["levels"][currentLevel.number]["totalScore"] = playerStats["levels"][currentLevel.number]["score_points"].reduce(function(sum, score) { return sum + score.weight;}, 0);
     return this.totalScore;
@@ -204,8 +225,14 @@ export default function() {
     ctx.fillText("Level Score: " + playerStats["levels"][currentLevel.number]["totalScore"], 10, 30);
     ctx.fillText("Total Score: " + playerStats.totalScore, 10, 55);
     ctx.fillText("x " + playerStats.balls, 38, 127);
+    ctx.fillText("x " + playerStats.goldCount, 28, 526);
+    ctx.fillText("x " + playerStats.silverCount, 28, 556);
+    ctx.fillText("x " + playerStats.steelCount, 28, 586);
     ctx.restore();
     statsBall.draw();
+    statsScorePointGold.draw();
+    statsScorePointSilver.draw();
+    statsScorePointSteel.draw();
   }
 
   function testGateHits(ball) {
