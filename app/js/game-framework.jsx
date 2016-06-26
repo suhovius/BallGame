@@ -38,10 +38,19 @@ export default function() {
   var blackHolesArray = [];
 
   var playerStats = {
-    "balls" : 7,
+    "balls" : 3,
     "levels" : {},
     "totalScore" : 0
   };
+
+  const PLAYER_STATS_INIT = {
+    "balls" : 3,
+    "levels" : {},
+    "totalScore" : 0,
+    "levels" : {}
+  };
+
+  var playerStats = PLAYER_STATS_INIT;
 
   playerStats.calculateTotalScore = function() {
     this.totalScore = 0;
@@ -83,6 +92,15 @@ export default function() {
     playerStats["levels"][currentLevel.number]["score_points"] = [];
     playerStats.calculateTotalScore();
     startGame();
+  });
+
+  var gameOverMenu = new Menu("GAME OVER!");
+  gameOverMenu.addButton("Restart Game", function() {
+    if (currentLevel.hasNextLevel()) {
+      currentLevel = currentLevel = new Level(1);
+      playerStats = Object.assign({}, PLAYER_STATS_INIT);
+      startGame();
+    }
   });
 
   var measureFPS = function(newTime){
@@ -132,6 +150,8 @@ export default function() {
 
       testGateHits(ball);
 
+      testBlackHoleHits(ball);
+
       // 3) draw the ball
       ball.draw(ctx);
     }
@@ -139,7 +159,7 @@ export default function() {
 
   function createMainBall(x, y) {
     ballArray = [];
-    var ball = new Ball(x, y, Math.PI/2, 1, 20, "player");
+    var ball = new Ball(x, y, 0, 1, 20, "player");
     ballArray[0] = ball;
   }
 
@@ -189,6 +209,23 @@ export default function() {
         // Gate hit detected
         if ((gatesArray[i].type === "finish") && (ball.role === "player") ) {
           currentGameState = gameStates.nextLevelMenu;
+        }
+      }
+    }
+  }
+
+  function testBlackHoleHits(ball) {
+    for (var i = 0; i < blackHolesArray.length; i++) {
+      if (distanceBettweenToPoints(blackHolesArray[i].x, blackHolesArray[i].y, ball.x, ball.y) < blackHolesArray[i].radius) {
+        // Black Hole hit detected
+        if (ball.role === "player") {
+          playerStats.balls--;
+          if (playerStats.balls > 0) {
+            var startGate = getStartGate(gatesArray);
+            ball.resetPosition(startGate.x, startGate.y);
+          } else {
+            currentGameState = gameStates.gameOver;
+          }
         }
       }
     }
@@ -246,12 +283,13 @@ export default function() {
           nextLevelMenu.draw(player, inputStates);
           break;
         case gameStates.gameOver:
-          ctx.save();
-          ctx.beginPath();
-          ctx.fillStyle="FF3333";
-          ctx.font = "70px Arial";
-          ctx.fillText("GAME OVER", 35, 70);
-          ctx.restore();
+          // ctx.save();
+          // ctx.beginPath();
+          // ctx.fillStyle="FF3333";
+          // ctx.font = "70px Arial";
+          // ctx.fillText("GAME OVER", 35, 70);
+          // ctx.restore();
+          gameOverMenu.draw(player, inputStates);
           // TODO! Add more UI friendly information
           break;
       }
@@ -281,6 +319,10 @@ export default function() {
     };
   }
 
+  function getStartGate(gatesArray) {
+    return gatesArray.find(function(gate) { return gate.type === "start"; });
+  }
+
   // TODO This should load current level and start game.
   function startGame() {
     ballArray = [];
@@ -288,7 +330,7 @@ export default function() {
     gatesArray = currentLevel.loadGates();
     blackHolesArray = currentLevel.loadBlackHoles();
     scorePointsArray = currentLevel.loadScorePoints();
-    var startGate = gatesArray.find(function(gate) { return gate.type === "start"; });
+    var startGate = getStartGate(gatesArray);
     createMainBall(startGate.x, startGate.y);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],

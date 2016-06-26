@@ -21,6 +21,13 @@ export default class Ball extends Graphical {
     this.newParams = {};
   }
 
+  resetPosition(x, y) {
+    this.x = x;
+    this.y = y;
+    this.angle = 0;
+    this.v = 0;
+  }
+
   draw() {
     let ctx = this.context();
     ctx.save();
