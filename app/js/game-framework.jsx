@@ -2,6 +2,7 @@ import { testCollisionWithWalls, testCollisionWithBricks, testCollisionWithScore
 import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
 import { distanceBettweenToPoints } from './math-utils';
 import canvasData from './canvas-data';
+import GraphicBall from './classes/graphic-ball';
 import Ball from './classes/ball';
 import Brick from './classes/brick';
 import SquareBrick from './classes/square-brick';
@@ -37,10 +38,15 @@ export default function() {
   var scorePointsArray = [];
   var blackHolesArray = [];
 
+  var statsBall = new GraphicBall(20, 120, 20, "#FF6633");
+
   const PLAYER_STATS_INIT = {
     "balls" : 3,
     "levels" : {},
     "totalScore" : 0,
+    "goldCount" : 0,
+    "silverCount" : 0,
+    "steelCount" : 0,
     "levels" : {}
   };
 
@@ -194,10 +200,12 @@ export default function() {
 
   function updateStats() {
     ctx.save();
-    ctx.fillText("Level Score: " + playerStats["levels"][currentLevel.number]["totalScore"], 200, 20);
-    ctx.fillText("Total Score: " + playerStats.totalScore, 200, 45);
-    ctx.fillText("Balls: " + playerStats.balls, 200, 70);
+    ctx.fillStyle = "#33CC33";
+    ctx.fillText("Level Score: " + playerStats["levels"][currentLevel.number]["totalScore"], 10, 30);
+    ctx.fillText("Total Score: " + playerStats.totalScore, 10, 55);
+    ctx.fillText("x " + playerStats.balls, 38, 127);
     ctx.restore();
+    statsBall.draw();
   }
 
   function testGateHits(ball) {

@@ -83,10 +83,10 @@ function checkBallControllable(ballArray, player, inputStates, powerBoost, ctx) 
         };
 
         ctx.save();
-        ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 10, 20);
-        ctx.fillText("Speed: " + ball.newParams.v.toFixed(2), 10, 45);
-        ctx.fillText("Power: " + powerInit.toFixed(2), 10, 65);
-        ctx.fillText("Boost: " + powerBoost.toFixed(2), 10, 85);
+        ctx.fillStyle = "#33CC33";
+        ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 470, 30);
+        ctx.fillText("Speed: " + ball.newParams.v.toFixed(2), 470, 55);
+        ctx.fillText("Power: " + powerInit.toFixed(2), 470, 80);
         ctx.beginPath();
         ctx.strokeStyle = 'LightGreen';
         ctx.lineWidth = 3;
