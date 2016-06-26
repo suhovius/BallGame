@@ -42,7 +42,7 @@ export default class Level {
   }
 
   loadScorePoints() {
-    let scorePoints = []
+    let scorePoints = [];
     if (levelsData(this.number)["score_points"]) {
       scorePoints = levelsData(this.number)["score_points"].map(function(score_point_args) {
         return new ScorePoint(...score_point_args);
@@ -53,9 +53,14 @@ export default class Level {
   }
 
   loadBlackHoles() {
-    return levelsData(this.number)["black_holes"].map(function(black_hole_args) {
-      return new BlackHole(...black_hole_args);
-    });
+    let blackHoles = [];
+    if (levelsData(this.number)["black_holes"]) {
+      blackHoles = levelsData(this.number)["black_holes"].map(function(black_hole_args) {
+        return new BlackHole(...black_hole_args);
+      });
+    }
+
+    return blackHoles;
   }
 
   hasNextLevel() {

@@ -187,24 +187,13 @@ export default function() {
 
   // TODO This might be used later at some levels
   // function createBalls(numberOfBalls) {
-  //     // Start from an empty array
-  //     ballArray = [];
+  //   for (var i = 0; i < numberOfBalls; i++) {
+  //     // Create a ball with random position and speed.
+  //     // You can change the radius
+  //     var ball = new Ball(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "competitor");
 
-  //     for (var i = 0; i < numberOfBalls; i++) {
-  //         // Create a ball with random position and speed.
-  //         // You can change the radius
-  //         var ball = new Ball(w * Math.random(),
-  //                 h * Math.random(),
-  //                 20,
-  //                 "#0000FF"
-  //                 (2 * Math.PI) * Math.random(),
-  //                 (100),
-  //                 "competitor");
-
-
-  //         ballArray[i] = ball;
-
-  //     }
+  //     ballArray.push(ball);
+  //   }
   // }
 
   function updateBricks() {
@@ -366,6 +355,7 @@ export default function() {
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = getStartGate(gatesArray);
     createMainBall(startGate.x, startGate.y);
+    //createBalls(3);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],
       "totalScore" : 0
