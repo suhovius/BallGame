@@ -8,6 +8,7 @@ export default class GraphicBall extends Graphical {
     this.y = y;
     this.radius = diameter / 2;
     this.color = color;
+    this.hotSpotColor = '#E0E0E0';
   }
 
   draw() {
@@ -19,7 +20,7 @@ export default class GraphicBall extends Graphical {
         outerRadius = this.radius * 1;
 
     var gradient = ctx.createRadialGradient(this.x-this.radius * 0.3, this.y -this.radius * 0.3, innerRadius, this.x -this.radius * 0.3, this.y-this.radius * 0.3, outerRadius);
-    gradient.addColorStop(0, '#E0E0E0');
+    gradient.addColorStop(0, this.hotSpotColor);
     gradient.addColorStop(1, this.color);
     ctx.fillStyle = gradient;
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);

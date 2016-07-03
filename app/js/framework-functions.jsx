@@ -34,7 +34,7 @@ function updateBlackHoles(blackHolesArray, delta) {
     if (blackHolesArray[i].isCollapsing()) {
       blackHolesArray[i].collapse(delta)
     }
-    blackHolesArray[i].draw();
+    blackHolesArray[i].draw(delta);
   }
 
   return blackHolesArray;

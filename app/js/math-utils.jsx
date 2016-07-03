@@ -47,6 +47,11 @@ function calcDistanceToMove(delta, speed) {
   return (speed * delta) / 1000;
 }
 
+function moveFromToLocationOffsetsXY(fromX, fromY, toX, toY, speed) {
+  let angle = Math.atan2(toY - fromY, toX - fromX);
+  return [Math.cos(angle) * speed, Math.sin(angle) * speed];
+}
+
 function msToSeconds(timeMs) {
   return timeMs / 1000;
 }
@@ -64,4 +69,4 @@ function hex2rgb(hex, opacity) {
   return 'rgba('+h.join(',')+')';
 }
 
-export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb }
+export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb, moveFromToLocationOffsetsXY }

@@ -1,6 +1,6 @@
 import Constants from '../constants';
 import Graphical from './graphical';
-import { hex2rgb } from '../math-utils'
+import { hex2rgb, calcDistanceToMove, moveFromToLocationOffsetsXY } from '../math-utils'
 import GraphicBall from './graphic-ball';
 
 export default class BlackHole extends Graphical {
@@ -19,7 +19,7 @@ export default class BlackHole extends Graphical {
     return this.radius / this.initialRadius;
   }
 
-  draw() {
+  draw(delta) {
     let ctx = this.context();
     ctx.save();
     ctx.beginPath();
@@ -40,13 +40,30 @@ export default class BlackHole extends Graphical {
     if (this.content) {
       this.content.radius = this.content.radius * this.collapseRate();
       this.content.color = hex2rgb(this.content.initialColor, this.collapseRate());
+      this.content.hotSpotColor = hex2rgb(this.content.initialHotSpotColor, this.collapseRate());
+
+      let offsetsXY = moveFromToLocationOffsetsXY(this.content.x, this.content.y, this.x, this.y, calcDistanceToMove(300, delta));
+      if (Math.abs(this.content.x - this.x) > 5 ) {
+        this.content.x += offsetsXY[0];
+      } else {
+        this.content.x = this.x;
+      }
+
+      if (Math.abs(this.content.y - this.y) > 5 ) {
+        this.content.y += offsetsXY[1];
+      }  else {
+        this.content.y = this.y;
+      }
+
       this.content.draw();
     }
   }
 
   setBallInside(ball) {
-    let innerBall = new GraphicBall(this.x, this.y, 2 * ball.radius, ball.color);
+    let innerBall = new GraphicBall(ball.x, ball.y, 2 * ball.radius, ball.color);
     innerBall.initialColor = innerBall.color;
+    innerBall.initialHotSpotColor = innerBall.hotSpotColor;
+
     this.content = innerBall;
   }
 
