@@ -1,4 +1,4 @@
-import { testCollisionWithWalls, testCollisionWithBricks, testCollisionWithScorePoints } from './collision-detection';
+import { testCollisionWithWalls, testCollisionWithBricks, testCollisionWithScorePoints, circleCollide } from './collision-detection';
 import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
 import { distanceBettweenToPoints } from './math-utils';
 import canvasData from './canvas-data';
@@ -148,6 +148,7 @@ export default function() {
   };
 
   function updateBalls() {
+    testCollisionBetweenBalls();
     let result = {};
     // Move and draw each ball, test collisions,
     for (var i = 0; i < ballArray.length; i++) {
@@ -179,22 +180,41 @@ export default function() {
   }
 
   function createMainBall(x, y) {
-    ballArray = [];
     var ball = new Ball(x, y, 20, "#FF6633", 0, 0, "player");
 
-    ballArray[0] = ball;
+    console.log(ball);
+
+    ballArray.push(ball);
   }
 
-  // TODO This might be used later at some levels
-  // function createBalls(numberOfBalls) {
-  //   for (var i = 0; i < numberOfBalls; i++) {
-  //     // Create a ball with random position and speed.
-  //     // You can change the radius
-  //     var ball = new Ball(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "competitor");
+  function testCollisionBetweenBalls() {
+    //var balls = ballArray;
 
-  //     ballArray.push(ball);
-  //   }
-  // }
+    for (var i = 0; i < ballArray.length; i++) {
+      for (var j = i + 1; j < ballArray.length; j++) {
+        if (circleCollide(ballArray[i].x, ballArray[i].y, ballArray[i].radius, ballArray[j].x, ballArray[j].y, ballArray[j].radius)) {
+          // TODO: Reset ball position to avoid mixing it with another ball's position. Avoid overlapping.
+          // http://stackoverflow.com/questions/17456783/javascript-figure-out-point-y-by-angle-and-distance
+
+          [ballArray[i].v, ballArray[j].v] = [ballArray[j].v, ballArray[i].v];
+
+          [ballArray[i].angle, ballArray[j].angle] = [ballArray[j].angle, ballArray[i].angle];
+        }
+      }
+    }
+  }
+
+
+  // TODO This might be used later at some levels
+  function createBalls(numberOfBalls) {
+    for (var i = 0; i < numberOfBalls; i++) {
+      // Create a ball with random position and speed.
+      // You can change the radius
+      var ball = new Ball(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "competitor");
+
+      ballArray.push(ball);
+    }
+  }
 
   function updateBricks() {
     for (var i = 0; i < bricksArray.length; i++) {
@@ -235,17 +255,22 @@ export default function() {
     }
   }
 
+  function removeBallFromArray(ballArray, ball) {
+    return ballArray.filter(function(array_ball) { return array_ball.uuid != ball.uuid; });
+  }
+
   function testBlackHoleHits(ball) {
     for (var i = 0; i < blackHolesArray.length; i++) {
       if (distanceBettweenToPoints(blackHolesArray[i].x, blackHolesArray[i].y, ball.x, ball.y) < blackHolesArray[i].radius) {
         // Black Hole hit detected
+        ballArray = removeBallFromArray(ballArray, ball);
         blackHolesArray[i].setBallInside(ball);
         blackHolesArray[i].startCollapse();
         if (ball.role === "player") {
           playerStats.balls--;
           if (playerStats.balls > 0) {
             var startGate = getStartGate(gatesArray);
-            ball.resetPosition(startGate.x, startGate.y);
+            createMainBall(startGate.x, startGate.y);
           } else {
             currentGameState = gameStates.gameOver;
           }
@@ -295,7 +320,7 @@ export default function() {
           // drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
           // drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);
 
-          updateTelemetry(telemetryContainer, ballArray[0]);
+          // updateTelemetry(telemetryContainer, ballArray[0]);
           // drawCollisionAngles(ctx, w, h, ballArray[0]);
 
         case gameStates.mainMenu:
@@ -355,7 +380,7 @@ export default function() {
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = getStartGate(gatesArray);
     createMainBall(startGate.x, startGate.y);
-    //createBalls(3);
+    createBalls(3);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],
       "totalScore" : 0

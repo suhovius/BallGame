@@ -1,4 +1,4 @@
-import { calcDistanceToMove } from '../math-utils';
+import { calcDistanceToMove, generateUUID } from '../math-utils';
 import { GRAVITY_ACCELERATION } from '../constants';
 import GraphicBall from './graphic-ball';
 
@@ -15,6 +15,7 @@ export default class Ball extends GraphicBall {
     this.hits = [];
     this.role = role;
     this.newParams = {};
+    this.uuid = generateUUID();
   }
 
   resetPosition(x, y) {
