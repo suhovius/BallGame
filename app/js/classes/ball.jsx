@@ -54,12 +54,23 @@ export default class Ball extends GraphicBall {
     ctx.beginPath();
     if (this.isInLaunchPosition()) {
       ctx.beginPath();
-      ctx.strokeStyle = 'LightGreen';
+      ctx.strokeStyle = 'LightGreen'; // TODO: This should accept selection&sling color attribute
       ctx.lineWidth=3;
       ctx.arc(this.x, this.y, this.radius + 3, 0, 2 * Math.PI);
       ctx.stroke();
     };
     ctx.restore();
+  }
+
+  drawSlingTo(toX, toY) {
+    let ctx = this.context();
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = 'LightGreen'; // TODO: This should accept selection&sling color attribute
+    ctx.lineWidth = 3;
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(toX, toY);
+    ctx.stroke();
   }
 
   vX() {

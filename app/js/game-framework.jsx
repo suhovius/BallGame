@@ -148,7 +148,7 @@ export default function() {
   };
 
   function updateBalls() {
-    testCollisionBetweenBalls();
+    testCollisionBetweenBalls(ballArray);
     let result = {};
     // Move and draw each ball, test collisions,
     for (var i = 0; i < ballArray.length; i++) {
@@ -162,12 +162,20 @@ export default function() {
 
       bricksArray = testCollisionWithBricks(bricksArray, ball);
 
-      result = testCollisionWithScorePoints(scorePointsArray, ball);
-      scorePointsArray = result["available"];
+      if (ball.role == "player") {
+        checkBallControllable(ball, player, inputStates, powerBoost, ctx);
 
-      if (result["collected"].length > 0) {
-        playerStats["levels"][currentLevel.number]["score_points"] = playerStats["levels"][currentLevel.number]["score_points"].concat(result["collected"]);
-        playerStats.calculateTotalScore();
+        result = testCollisionWithScorePoints(scorePointsArray, ball);
+        scorePointsArray = result["available"];
+
+        if (result["collected"].length > 0) {
+          playerStats["levels"][currentLevel.number]["score_points"] = playerStats["levels"][currentLevel.number]["score_points"].concat(result["collected"]);
+          playerStats.calculateTotalScore();
+        }
+      }
+
+      if (ball.role == "competitor") {
+        competitorBallLogic(ball, ballArray, delta);
       }
 
       testGateHits(ball);
@@ -179,15 +187,41 @@ export default function() {
     }
   }
 
+  // TODO Move this to BallCompetitor class logic. Also change selection colors and draw sling for competitor
+  function competitorBallLogic(ball, ballArray, delta) {
+    let playerBall = ballArray.find( function(b) { return b.role == "player"; });
+    let aimingSlingEndCoordinates;
+    if (playerBall) {
+      if (ball.isInLaunchPosition()) {
+        ball.drawSelection();
+        if (!ball.aiming) {
+          ball.aiming = true;
+        };
+        if (ball.aiming) {
+          ball.aimingTimeRemaining -= delta;
+        }
+        ball.angle = angleBetween2Lines(ball.x, ball.y, playerBall.x, playerBall.y, ball.x, ball.y, ball.x+25, ball.y);
+
+        aimingSlingEndCoordinates = findNewPointBy(ball.x, ball.y, Math.PI + ball.angle, 100);
+
+        ball.drawSlingTo(aimingSlingEndCoordinates.x, aimingSlingEndCoordinates.y);
+        if (ball.aimingTimeRemaining <= 0) {
+          ball.aiming = false;
+          ball.v = 500;
+        }
+      } else {
+        ball.aimingTimeRemaining = 5 * 1000; // 5 seconds
+      }
+    }
+  }
+
   function createMainBall(x, y) {
     var ball = new Ball(x, y, 20, "#FF6633", 0, 0, "player");
 
     ballArray.push(ball);
   }
 
-  function testCollisionBetweenBalls() {
-    //var balls = ballArray;
-
+  function testCollisionBetweenBalls(ballArray) {
     let collisionAngle, newCoordinates;
 
     for (var i = 0; i < ballArray.length; i++) {
@@ -315,8 +349,6 @@ export default function() {
           updateScorePoints();
           // Update balls positions
           updateBalls();
-
-          checkBallControllable(ballArray, player, inputStates, powerBoost, ctx);
 
           updateStats();
 

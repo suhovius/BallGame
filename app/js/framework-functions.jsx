@@ -56,70 +56,66 @@ function drawGameAreaBorder(ctx, canvas) {
   ctx.restore();
 }
 
+function checkBallControllable(ball, player, inputStates, powerBoost, ctx) {
+  if (circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+    ball.drawSelection();
+  }
 
-function checkBallControllable(ballArray, player, inputStates, powerBoost, ctx) {
-  for (var i = 0; i < ballArray.length; i++) {
-    var ball = ballArray[i];
+  if (ball.isInLaunchPosition() && inputStates.mouseDownPos && circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
+    ball.drawSelection();
 
-    if (circleCollide(player.x, player.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
-      ball.drawSelection();
-    }
+    if(inputStates.mousedown) {
 
-    if (ball.isInLaunchPosition() && inputStates.mouseDownPos && circleCollide(inputStates.mouseDownPos.x, inputStates.mouseDownPos.y, player.boundingCircleRadius, ball.x, ball.y, ball.radius)) {
-      ball.drawSelection();
-
-      if(inputStates.mousedown) {
-
-        var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
-        if (powerInit > 100) {
-          powerInit = 100;
-        }
-        var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
-
-        ball.newParams = {
-          angle: Math.PI + angle,
-          v: powerInit * powerBoost,
-          isSet: true
-        };
-
-        ctx.save();
-        ctx.fillStyle = "#33CC33";
-        ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 470, 30);
-        ctx.fillText("Speed: " + ball.newParams.v.toFixed(2), 470, 55);
-        ctx.fillText("Power: " + powerInit.toFixed(2), 470, 80);
-        ctx.beginPath();
-        ctx.strokeStyle = 'LightGreen';
-        ctx.lineWidth = 3;
-        ctx.moveTo(ball.x, ball.y);
-        ctx.lineTo(ball.x + powerInit * Math.cos(2*Math.PI+angle), ball.y + powerInit * Math.sin(2*Math.PI+angle));
-        ctx.lineTo(ball.x - 500 * Math.cos(2*Math.PI+angle), ball.y - 500 * Math.sin(2*Math.PI+angle));
-        // ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
-        ctx.stroke();
-        // ctx.beginPath();
-        // ctx.strokeStyle = 'BlueViolet';
-        // ctx.fillStyle = 'BlueViolet';
-        // ctx.moveTo(ball.x, 0);
-        // ctx.lineTo(ball.x, h);
-        // ctx.stroke();
-        // ctx.moveTo(0, ball.y);
-        // ctx.lineTo(w, ball.y);
-        // ctx.stroke();
-        // ctx.fillText("0", w-25, ball.y+25);
-        // ctx.fillText("90", ball.x-30, h-25);
-        // ctx.fillText("180", 25, ball.y-25);
-        // ctx.fillText("270", ball.x+25, 50);
-        // ctx.fillStyle = 'Black';
-
-        ctx.restore();
+      var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
+      if (powerInit > 100) {
+        powerInit = 100;
       }
-    }
+      var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
 
-    if (ball.newParams.isSet && !inputStates.mousedown) {
-      ball.angle  = ball.newParams.angle;
-      ball.v = ball.newParams.v;
-      ball.newParams.isSet = false;
-    }
+      ball.newParams = {
+        angle: Math.PI + angle,
+        v: powerInit * powerBoost,
+        isSet: true
+      };
 
+      ball.drawSlingTo(ball.x + powerInit * Math.cos(2*Math.PI+angle), ball.y + powerInit * Math.sin(2*Math.PI+angle));
+
+      ctx.save();
+      ctx.fillStyle = "#33CC33";
+      ctx.fillText("Angle: " + ((2*Math.PI - (Math.PI + angle)) * (180/ Math.PI)).toFixed(2), 470, 30);
+      ctx.fillText("Speed: " + ball.newParams.v.toFixed(2), 470, 55);
+      ctx.fillText("Power: " + powerInit.toFixed(2), 470, 80);
+      // ctx.beginPath();
+      // ctx.strokeStyle = 'LightGreen';
+      // ctx.lineWidth = 3;
+      // ctx.moveTo(ball.x, ball.y);
+      // ctx.lineTo(ball.x + powerInit * Math.cos(2*Math.PI+angle), ball.y + powerInit * Math.sin(2*Math.PI+angle));
+     // ctx.lineTo(ball.x - 500 * Math.cos(2*Math.PI+angle), ball.y - 500 * Math.sin(2*Math.PI+angle));
+      // ctx.lineTo(inputStates.mousePos.x, inputStates.mousePos.y);
+      //ctx.stroke();
+      // ctx.beginPath();
+      // ctx.strokeStyle = 'BlueViolet';
+      // ctx.fillStyle = 'BlueViolet';
+      // ctx.moveTo(ball.x, 0);
+      // ctx.lineTo(ball.x, h);
+      // ctx.stroke();
+      // ctx.moveTo(0, ball.y);
+      // ctx.lineTo(w, ball.y);
+      // ctx.stroke();
+      // ctx.fillText("0", w-25, ball.y+25);
+      // ctx.fillText("90", ball.x-30, h-25);
+      // ctx.fillText("180", 25, ball.y-25);
+      // ctx.fillText("270", ball.x+25, 50);
+      // ctx.fillStyle = 'Black';
+
+      ctx.restore();
+    }
+  }
+
+  if (ball.newParams.isSet && !inputStates.mousedown) {
+    ball.angle  = ball.newParams.angle;
+    ball.v = ball.newParams.v;
+    ball.newParams.isSet = false;
   }
 }
 
