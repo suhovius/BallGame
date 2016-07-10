@@ -1,3 +1,12 @@
+function findNewPointBy(x, y, angle, distance) {
+  var result = {};
+
+  result.x = Math.round(Math.cos(angle) * distance + x);
+  result.y = Math.round(Math.sin(angle) * distance + y);
+
+  return result;
+}
+
 function distanceBettweenToPoints(x1, y1, x2, y2) {
   return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
 }
@@ -84,4 +93,4 @@ function generateUUID() {
 };
 
 
-export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb, moveFromToLocationOffsetsXY, generateUUID }
+export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb, moveFromToLocationOffsetsXY, generateUUID, findNewPointBy }

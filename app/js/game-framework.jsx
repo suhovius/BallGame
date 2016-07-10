@@ -1,6 +1,6 @@
 import { testCollisionWithWalls, testCollisionWithBricks, testCollisionWithScorePoints, circleCollide } from './collision-detection';
 import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
-import { distanceBettweenToPoints } from './math-utils';
+import { distanceBettweenToPoints, findNewPointBy, angleBetween2Lines } from './math-utils';
 import canvasData from './canvas-data';
 import GraphicBall from './classes/graphic-ball';
 import Ball from './classes/ball';
@@ -182,19 +182,22 @@ export default function() {
   function createMainBall(x, y) {
     var ball = new Ball(x, y, 20, "#FF6633", 0, 0, "player");
 
-    console.log(ball);
-
     ballArray.push(ball);
   }
 
   function testCollisionBetweenBalls() {
     //var balls = ballArray;
 
+    let collisionAngle, newCoordinates;
+
     for (var i = 0; i < ballArray.length; i++) {
       for (var j = i + 1; j < ballArray.length; j++) {
         if (circleCollide(ballArray[i].x, ballArray[i].y, ballArray[i].radius, ballArray[j].x, ballArray[j].y, ballArray[j].radius)) {
-          // TODO: Reset ball position to avoid mixing it with another ball's position. Avoid overlapping.
-          // http://stackoverflow.com/questions/17456783/javascript-figure-out-point-y-by-angle-and-distance
+          // Reset ball position to avoid mixing it with another ball's position. Avoid overlapping.
+          collisionAngle = angleBetween2Lines(ballArray[i].x, ballArray[i].y, ballArray[j].x, ballArray[j].y, ballArray[i].x, ballArray[i].y, ballArray[i].x+25, ballArray[i].y);
+          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius - 1); // Here is - 1 to make it move more smoother when speed is almost zero
+          ballArray[j].x = newCoordinates.x;
+          ballArray[j].y = newCoordinates.y;
 
           [ballArray[i].v, ballArray[j].v] = [ballArray[j].v, ballArray[i].v];
 
