@@ -3,8 +3,9 @@ import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
 import { distanceBettweenToPoints, findNewPointBy, angleBetween2Lines } from './math-utils';
 import canvasData from './canvas-data';
 import GraphicBall from './classes/graphic-ball';
-import BallCompetitor from './classes/ball-competitor';
-import BallPlayer from './classes/ball-player';
+import CompetitorBall from './classes/competitor-ball';
+import NeutralBall from './classes/neutral-ball';
+import PlayerBall from './classes/player-ball';
 import Brick from './classes/brick';
 import SquareBrick from './classes/square-brick';
 import Gate from './classes/gate';
@@ -163,7 +164,7 @@ export default function() {
 
       bricksArray = testCollisionWithBricks(bricksArray, ball);
 
-      if (ball instanceof BallPlayer) {
+      if (ball instanceof PlayerBall) {
         checkBallControllable(ball, player, inputStates, powerBoost, ctx);
 
         result = testCollisionWithScorePoints(scorePointsArray, ball);
@@ -175,8 +176,8 @@ export default function() {
         }
       }
 
-      if (ball instanceof BallCompetitor) {
-        ball.actionLogic(ballArray.find( function(b) { return b instanceof BallPlayer; }), delta);
+      if (ball instanceof CompetitorBall) {
+        ball.actionLogic(ballArray.find( function(b) { return b instanceof PlayerBall; }), delta);
       }
 
       testGateHits(ball);
@@ -189,7 +190,7 @@ export default function() {
   }
 
   function createPlayerBall(x, y) {
-    var ball = new BallPlayer(x, y, 20, "#FF6633", 0, 0, 'LightGreen');
+    var ball = new PlayerBall(x, y, 20, "#FF6633", 0, 0, 'LightGreen');
 
     ballArray.push(ball);
   }
@@ -218,11 +219,8 @@ export default function() {
   // TODO This might be used later at some levels
   function createBalls(numberOfBalls) {
     for (var i = 0; i < numberOfBalls; i++) {
-      // Create a ball with random position and speed.
-      // You can change the radius
-      var ball = new BallCompetitor(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "#cc33ff");
-
-      ballArray.push(ball);
+      ballArray.push( new CompetitorBall(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "#cc33ff") );
+      ballArray.push( new NeutralBall(w * Math.random(),h * Math.random(), 20, "#848484", (2 * Math.PI) * Math.random(), (100), "#848484") );
     }
   }
 
@@ -258,7 +256,7 @@ export default function() {
     for (var i = 0; i < gatesArray.length; i++) {
       if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
         // Gate hit detected
-        if ((gatesArray[i].type === "finish") && (ball instanceof BallPlayer) ) {
+        if ((gatesArray[i].type === "finish") && (ball instanceof PlayerBall) ) {
           currentGameState = gameStates.nextLevelMenu;
         }
       }
@@ -276,7 +274,7 @@ export default function() {
         ballArray = removeBallFromArray(ballArray, ball);
         blackHolesArray[i].setBallInside(ball);
         blackHolesArray[i].startCollapse();
-        if (ball instanceof BallPlayer) {
+        if (ball instanceof PlayerBall) {
           playerStats.balls--;
           if (playerStats.balls > 0) {
             var startGate = getStartGate(gatesArray);

@@ -1,7 +1,7 @@
 import Ball from './ball';
 import { findNewPointBy, angleBetween2Lines } from '../math-utils';
 
-export default class BallCompetitor extends Ball {
+export default class CompetitorBall extends Ball {
 
   actionLogic(playerBall, delta) {
     let aimingSlingEndCoordinates;
