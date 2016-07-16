@@ -280,7 +280,6 @@ export default function() {
         ball.isAlive = false;
         ballArray = removeBallFromArray(ballArray, ball);
         blackHolesArray[i].setBallInside(ball);
-        blackHolesArray[i].startCollapse();
         if (ball instanceof PlayerBall) {
           playerStats.balls--;
           if (playerStats.balls > 0) {

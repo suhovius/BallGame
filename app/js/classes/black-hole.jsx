@@ -5,14 +5,15 @@ import GraphicBall from './graphic-ball';
 
 export default class BlackHole extends Graphical {
 
-  constructor(x, y, diameter) {
+  constructor(x, y, diameter, contentsToCollapseNumber) {
     super();
     this.x = x;
     this.y = y;
     this.radius = diameter / 2;
     this.initialRadius = this.radius;
     this.status = "active";
-    this.content = null;
+    this.contents = [];
+    this.contentsToCollapseNumber = contentsToCollapseNumber
   }
 
   collapseRate() {
@@ -37,26 +38,7 @@ export default class BlackHole extends Graphical {
     ctx.fill();
 
     ctx.restore();
-    if (this.content) {
-      this.content.radius = this.content.radius * this.collapseRate();
-      this.content.color = hex2rgb(this.content.initialColor, this.collapseRate());
-      this.content.hotSpotColor = hex2rgb(this.content.initialHotSpotColor, this.collapseRate());
-
-      let offsetsXY = moveFromToLocationOffsetsXY(this.content.x, this.content.y, this.x, this.y, calcDistanceToMove(300, delta));
-      if (Math.abs(this.content.x - this.x) > 5 ) {
-        this.content.x += offsetsXY[0];
-      } else {
-        this.content.x = this.x;
-      }
-
-      if (Math.abs(this.content.y - this.y) > 5 ) {
-        this.content.y += offsetsXY[1];
-      }  else {
-        this.content.y = this.y;
-      }
-
-      this.content.draw();
-    }
+    this.drawContents(delta);
   }
 
   setBallInside(ball) {
@@ -64,12 +46,51 @@ export default class BlackHole extends Graphical {
     innerBall.initialColor = innerBall.color;
     innerBall.initialHotSpotColor = innerBall.hotSpotColor;
 
-    this.content = innerBall;
+    this.contents.push(innerBall);
+
+    if (this.shouldCollapse()) {
+      this.startCollapse();
+    }
+  }
+
+  drawContents(delta) {
+    let contentItem;
+    for (var i = 0; i < this.contents.length; i++) {
+      contentItem = this.contents[i];
+      contentItem.radius = contentItem.radius * this.collapseRate();
+      contentItem.color = hex2rgb(contentItem.initialColor, this.collapseRate());
+      contentItem.hotSpotColor = hex2rgb(contentItem.initialHotSpotColor, this.collapseRate());
+
+      let offsetsXY = moveFromToLocationOffsetsXY(contentItem.x, contentItem.y, this.x, this.y, calcDistanceToMove(300, delta));
+      if (Math.abs(contentItem.x - this.x) > 5 ) {
+        contentItem.x += offsetsXY[0];
+      } else {
+        contentItem.x = this.x;
+      }
+
+      if (Math.abs(contentItem.y - this.y) > 5 ) {
+        contentItem.y += offsetsXY[1];
+      }  else {
+        contentItem.y = this.y;
+      }
+
+      if (!(contentItem.x == this.x && contentItem.y == this.y)) {
+        contentItem.draw();
+      }
+
+    }
   }
 
   startCollapse() {
-    this.status = "collapse";
+    if (this.shouldCollapse()) {
+      this.status = "collapse";
+    }
   }
+
+  shouldCollapse() {
+    return this.contentsToCollapseNumber <= this.contents.length;
+  }
+
 
   isCollapsing() {
     return this.status == "collapse";

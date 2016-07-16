@@ -75,7 +75,7 @@ export default function levelsData(level) {
         finishGateParams((w-GAME_AREA_BORDER-15), (GAME_AREA_BORDER+15))
       ],
       "black_holes" : [
-        [GAME_AREA_BORDER + 255, GAME_AREA_BORDER + 120, 100]
+        [GAME_AREA_BORDER + 255, GAME_AREA_BORDER + 120, 100, 3]
       ]
     },
     {
