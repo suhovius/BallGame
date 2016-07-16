@@ -4,7 +4,7 @@ import GraphicBall from './graphic-ball';
 
 export default class Ball extends GraphicBall {
 
-  constructor(x, y, diameter, color, angle, v, role) {
+  constructor(x, y, diameter, color, angle, v, slingColor) {
     super(x, y, diameter, color);
 
     this.angle = angle;
@@ -13,8 +13,8 @@ export default class Ball extends GraphicBall {
     this.hitVelocity = 0;
     this.hitAngle = 0;
     this.hits = [];
-    this.role = role;
     this.newParams = {};
+    this.slingColor = slingColor;
     this.uuid = generateUUID();
   }
 
@@ -54,7 +54,7 @@ export default class Ball extends GraphicBall {
     ctx.beginPath();
     if (this.isInLaunchPosition()) {
       ctx.beginPath();
-      ctx.strokeStyle = 'LightGreen'; // TODO: This should accept selection&sling color attribute
+      ctx.strokeStyle = this.slingColor;
       ctx.lineWidth=3;
       ctx.arc(this.x, this.y, this.radius + 3, 0, 2 * Math.PI);
       ctx.stroke();
@@ -66,7 +66,7 @@ export default class Ball extends GraphicBall {
     let ctx = this.context();
     ctx.save();
     ctx.beginPath();
-    ctx.strokeStyle = 'LightGreen'; // TODO: This should accept selection&sling color attribute
+    ctx.strokeStyle = this.slingColor;
     ctx.lineWidth = 3;
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(toX, toY);

@@ -3,7 +3,8 @@ import { drawAxis, updateTelemetry, drawCollisionAngles } from './debug-utils';
 import { distanceBettweenToPoints, findNewPointBy, angleBetween2Lines } from './math-utils';
 import canvasData from './canvas-data';
 import GraphicBall from './classes/graphic-ball';
-import Ball from './classes/ball';
+import BallCompetitor from './classes/ball-competitor';
+import BallPlayer from './classes/ball-player';
 import Brick from './classes/brick';
 import SquareBrick from './classes/square-brick';
 import Gate from './classes/gate';
@@ -162,7 +163,7 @@ export default function() {
 
       bricksArray = testCollisionWithBricks(bricksArray, ball);
 
-      if (ball.role == "player") {
+      if (ball instanceof BallPlayer) {
         checkBallControllable(ball, player, inputStates, powerBoost, ctx);
 
         result = testCollisionWithScorePoints(scorePointsArray, ball);
@@ -174,8 +175,8 @@ export default function() {
         }
       }
 
-      if (ball.role == "competitor") {
-        competitorBallLogic(ball, ballArray, delta);
+      if (ball instanceof BallCompetitor) {
+        ball.actionLogic(ballArray.find( function(b) { return b instanceof BallPlayer; }), delta);
       }
 
       testGateHits(ball);
@@ -187,36 +188,8 @@ export default function() {
     }
   }
 
-  // TODO Move this to BallCompetitor class logic. Also change selection colors and draw sling for competitor
-  function competitorBallLogic(ball, ballArray, delta) {
-    let playerBall = ballArray.find( function(b) { return b.role == "player"; });
-    let aimingSlingEndCoordinates;
-    if (playerBall) {
-      if (ball.isInLaunchPosition()) {
-        ball.drawSelection();
-        if (!ball.aiming) {
-          ball.aiming = true;
-        };
-        if (ball.aiming) {
-          ball.aimingTimeRemaining -= delta;
-        }
-        ball.angle = angleBetween2Lines(ball.x, ball.y, playerBall.x, playerBall.y, ball.x, ball.y, ball.x+25, ball.y);
-
-        aimingSlingEndCoordinates = findNewPointBy(ball.x, ball.y, Math.PI + ball.angle, 100);
-
-        ball.drawSlingTo(aimingSlingEndCoordinates.x, aimingSlingEndCoordinates.y);
-        if (ball.aimingTimeRemaining <= 0) {
-          ball.aiming = false;
-          ball.v = 500;
-        }
-      } else {
-        ball.aimingTimeRemaining = 5 * 1000; // 5 seconds
-      }
-    }
-  }
-
-  function createMainBall(x, y) {
-    var ball = new Ball(x, y, 20, "#FF6633", 0, 0, "player");
+  function createPlayerBall(x, y) {
+    var ball = new BallPlayer(x, y, 20, "#FF6633", 0, 0, 'LightGreen');
 
     ballArray.push(ball);
   }
@@ -247,7 +220,7 @@ export default function() {
     for (var i = 0; i < numberOfBalls; i++) {
       // Create a ball with random position and speed.
       // You can change the radius
-      var ball = new Ball(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "competitor");
+      var ball = new BallCompetitor(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "#cc33ff");
 
       ballArray.push(ball);
     }
@@ -285,7 +258,7 @@ export default function() {
     for (var i = 0; i < gatesArray.length; i++) {
       if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
         // Gate hit detected
-        if ((gatesArray[i].type === "finish") && (ball.role === "player") ) {
+        if ((gatesArray[i].type === "finish") && (ball instanceof BallPlayer) ) {
           currentGameState = gameStates.nextLevelMenu;
         }
       }
@@ -303,11 +276,11 @@ export default function() {
         ballArray = removeBallFromArray(ballArray, ball);
         blackHolesArray[i].setBallInside(ball);
         blackHolesArray[i].startCollapse();
-        if (ball.role === "player") {
+        if (ball instanceof BallPlayer) {
           playerStats.balls--;
           if (playerStats.balls > 0) {
             var startGate = getStartGate(gatesArray);
-            createMainBall(startGate.x, startGate.y);
+            createPlayerBall(startGate.x, startGate.y);
           } else {
             currentGameState = gameStates.gameOver;
           }
@@ -414,7 +387,7 @@ export default function() {
     blackHolesArray = currentLevel.loadBlackHoles();
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = getStartGate(gatesArray);
-    createMainBall(startGate.x, startGate.y);
+    createPlayerBall(startGate.x, startGate.y);
     createBalls(3);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],
