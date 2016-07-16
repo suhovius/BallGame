@@ -4,6 +4,7 @@ import { distanceBettweenToPoints, findNewPointBy, angleBetween2Lines } from './
 import canvasData from './canvas-data';
 import GraphicBall from './classes/graphic-ball';
 import CompetitorBall from './classes/competitor-ball';
+import FriendlyBall from './classes/friendly-ball';
 import NeutralBall from './classes/neutral-ball';
 import PlayerBall from './classes/player-ball';
 import Brick from './classes/brick';
@@ -177,7 +178,11 @@ export default function() {
       }
 
       if (ball instanceof CompetitorBall) {
-        ball.actionLogic(ballArray.find( function(b) { return b instanceof PlayerBall; }), delta);
+        ball.actionLogic(ballArray, delta);
+      }
+
+      if (ball instanceof FriendlyBall) {
+        ball.actionLogic(ballArray, delta);
       }
 
       testGateHits(ball);
@@ -221,6 +226,7 @@ export default function() {
     for (var i = 0; i < numberOfBalls; i++) {
       ballArray.push( new CompetitorBall(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "#cc33ff") );
       ballArray.push( new NeutralBall(w * Math.random(),h * Math.random(), 20, "#848484", (2 * Math.PI) * Math.random(), (100), "#848484") );
+      ballArray.push( new FriendlyBall(w * Math.random(),h * Math.random(), 20, "#868A08", (2 * Math.PI) * Math.random(), (100), "#31B404") );
     }
   }
 
@@ -271,6 +277,7 @@ export default function() {
     for (var i = 0; i < blackHolesArray.length; i++) {
       if (distanceBettweenToPoints(blackHolesArray[i].x, blackHolesArray[i].y, ball.x, ball.y) < blackHolesArray[i].radius) {
         // Black Hole hit detected
+        ball.isAlive = false;
         ballArray = removeBallFromArray(ballArray, ball);
         blackHolesArray[i].setBallInside(ball);
         blackHolesArray[i].startCollapse();
@@ -386,7 +393,7 @@ export default function() {
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = getStartGate(gatesArray);
     createPlayerBall(startGate.x, startGate.y);
-    createBalls(3);
+    createBalls(1);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],
       "totalScore" : 0

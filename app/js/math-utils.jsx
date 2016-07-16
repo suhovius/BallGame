@@ -7,6 +7,10 @@ function findNewPointBy(x, y, angle, distance) {
   return result;
 }
 
+function randomArrayValue(array) {
+  return array[Math.floor(Math.random()*array.length)];
+}
+
 function distanceBettweenToPoints(x1, y1, x2, y2) {
   return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
 }
@@ -93,4 +97,4 @@ function generateUUID() {
 };
 
 
-export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb, moveFromToLocationOffsetsXY, generateUUID, findNewPointBy }
+export { distanceBettweenToPoints, angleBetween2Lines, dotLineLength, calcDistanceToMove, msToSeconds, hex2rgb, moveFromToLocationOffsetsXY, generateUUID, findNewPointBy, randomArrayValue }
