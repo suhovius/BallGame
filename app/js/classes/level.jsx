@@ -5,6 +5,9 @@ import BreakableBrick from './breakable-brick';
 import ScorePoint from './score-point';
 import Gate from './gate';
 import BlackHole from './black-hole';
+import CompetitorBall from './competitor-ball';
+import FriendlyBall from './friendly-ball';
+import NeutralBall from './neutral-ball';
 
 export default class Level {
   constructor(number) {
@@ -50,6 +53,24 @@ export default class Level {
     }
 
     return scorePoints;
+  }
+
+  loadBalls() {
+    let balls = [];
+    if (levelsData(this.number)["balls"]) {
+      balls = levelsData(this.number)["balls"].map(function(ball_args) {
+        switch (ball_args[0]) {
+          case "competitor":
+            return new CompetitorBall(ball_args[1], ball_args[2], 20, "#0000FF", 0, 0, "#cc33ff");
+          case "neutral":
+            return new NeutralBall(ball_args[1], ball_args[2], 20, "#848484", 0, 0, "#848484");
+          case "friendly":
+            return new FriendlyBall(ball_args[1], ball_args[2], 20, "#868A08", 0, 0, "#31B404");
+        }
+      });
+    }
+
+    return balls;
   }
 
   loadBlackHoles() {

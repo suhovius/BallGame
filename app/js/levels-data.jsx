@@ -75,8 +75,12 @@ export default function levelsData(level) {
         finishGateParams((w-GAME_AREA_BORDER-15), (GAME_AREA_BORDER+15))
       ],
       "black_holes" : [
-        [GAME_AREA_BORDER + 255, GAME_AREA_BORDER + 120, 100, 3],
-        [GAME_AREA_BORDER + 355, GAME_AREA_BORDER + 320, 100, 5],
+        [GAME_AREA_BORDER + 255, GAME_AREA_BORDER + 120, 100, 3]
+      ],
+      "balls" : [
+        ["neutral", GAME_AREA_BORDER + 175, GAME_AREA_BORDER  + 345],
+        ["friendly", GAME_AREA_BORDER + 325, GAME_AREA_BORDER  + 430],
+        ["competitor", GAME_AREA_BORDER + 45, GAME_AREA_BORDER  + 470],
       ]
     },
     {

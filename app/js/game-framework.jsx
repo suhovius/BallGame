@@ -220,16 +220,6 @@ export default function() {
     }
   }
 
-
-  // TODO This might be used later at some levels
-  function createBalls(numberOfBalls) {
-    for (var i = 0; i < numberOfBalls; i++) {
-      ballArray.push( new CompetitorBall(w * Math.random(),h * Math.random(), 20, "#0000FF", (2 * Math.PI) * Math.random(), (100), "#cc33ff") );
-      ballArray.push( new NeutralBall(w * Math.random(),h * Math.random(), 20, "#848484", (2 * Math.PI) * Math.random(), (100), "#848484") );
-      ballArray.push( new FriendlyBall(w * Math.random(),h * Math.random(), 20, "#868A08", (2 * Math.PI) * Math.random(), (100), "#31B404") );
-    }
-  }
-
   function updateBricks() {
     for (var i = 0; i < bricksArray.length; i++) {
       bricksArray[i].draw();
@@ -385,14 +375,13 @@ export default function() {
 
   // TODO This should load current level and start game.
   function startGame() {
-    ballArray = [];
+    ballArray = currentLevel.loadBalls();
     bricksArray = currentLevel.loadBricks();
     gatesArray = currentLevel.loadGates();
     blackHolesArray = currentLevel.loadBlackHoles();
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = getStartGate(gatesArray);
     createPlayerBall(startGate.x, startGate.y);
-    createBalls(3);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],
       "totalScore" : 0
