@@ -1,7 +1,15 @@
-import { GAME_AREA_BORDER, MAX_POWER_INIT } from './constants';
+import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST } from './constants';
 
 import { circleCollide } from './collision-detection';
 import { distanceBettweenToPoints, angleBetween2Lines } from './math-utils';
+
+function calculateSoundGainForBallCollision(speed) {
+  let gainValue = speed / (POWER_BOOST * MAX_POWER_INIT);
+  if (gainValue > 1) {
+    gainValue = 1;
+  }
+  return gainValue
+}
 
 function clearCanvas(ctx, canvas) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -116,4 +124,4 @@ function checkBallControllable(ball, player, inputStates, powerBoost, ctx) {
   }
 }
 
-export { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles }
+export { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles, calculateSoundGainForBallCollision }

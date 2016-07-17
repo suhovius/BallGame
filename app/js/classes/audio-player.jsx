@@ -2,7 +2,12 @@ export default class AudioPlayer {
 
   constructor(url, options={}) {
     this.url = url;
-    this.options = options;
+    if (typeof options["gainCoefficient"] != 'undefined') {
+      this.gainCoefficient = options["gainCoefficient"];
+    } else {
+      this.gainCoefficient = 1;
+    }
+
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext);
     this._loadBuffer();
   }
@@ -14,11 +19,12 @@ export default class AudioPlayer {
        let compressorNode = this.audioCtx.createDynamicsCompressor();
        let gainNode = this.audioCtx.createGain();
 
+       let gain = 1;
        if (typeof options["gain"] != 'undefined') {
-         gainNode.gain.value = options["gain"];
-       } else {
-         gainNode.gain.value = 1;
+         gain = options["gain"];
        }
+
+       gainNode.gain.value = gain * this.gainCoefficient;
 
        sourceNode.buffer = this.buffer;
        sourceNode.connect(gainNode);

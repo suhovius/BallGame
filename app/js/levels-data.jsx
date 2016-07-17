@@ -78,6 +78,9 @@ export default function levelsData(level) {
         [GAME_AREA_BORDER + 255, GAME_AREA_BORDER + 120, 100, 3]
       ],
       "balls" : [
+        // ["neutral", GAME_AREA_BORDER + 45, GAME_AREA_BORDER  + 55],
+        // ["neutral", GAME_AREA_BORDER + 45, GAME_AREA_BORDER  + 65],
+        // ["neutral", GAME_AREA_BORDER + 45, GAME_AREA_BORDER  + 75],
         ["neutral", GAME_AREA_BORDER + 175, GAME_AREA_BORDER  + 345],
         ["friendly", GAME_AREA_BORDER + 325, GAME_AREA_BORDER  + 430],
         ["competitor", GAME_AREA_BORDER + 45, GAME_AREA_BORDER  + 470],

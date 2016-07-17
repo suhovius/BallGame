@@ -29,7 +29,6 @@ function testCollisionWithWalls(w, h, gameAreaBorder, ball) {
       ball.x = (ball.radius + gameAreaBorder);
       ball.collisionReset(Math.PI/2); // set current values like speed, angle, and reset run time to zero
       ball.angle = -ball.angle + Math.PI;
-
   }
   // right
   if (ball.x > (w - gameAreaBorder) - (ball.radius)) {
@@ -169,9 +168,6 @@ function testCollisionWithBricks(bricksArray, ball) {
   let removeAtIndexes = [];
   for (var i = 0; i < bricksArray.length; i ++) {
     if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
-      if (ball.v > 3) {
-        sounds.play("ballCollisionHit");
-      }
       if (bricksArray[i].constructor.name == "BreakableBrick") {
         removeAtIndexes.push(i);
         sounds.play("breakableBrickHit");

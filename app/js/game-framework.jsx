@@ -15,8 +15,8 @@ import ScorePoint from './classes/score-point';
 import MenuButton from './classes/menu-button';
 import Menu from './classes/menu';
 import Level from './classes/level';
-import { GAME_AREA_BORDER, MAX_POWER_INIT } from './constants';
-import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles } from './framework-functions';
+import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST } from './constants';
+import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles, calculateSoundGainForBallCollision } from './framework-functions';
 import sounds from './sounds';
 
 export default function() {
@@ -32,7 +32,7 @@ export default function() {
   // for time based animation
   var delta, oldTime = 0;
 
-  var powerBoost = 5;
+  var powerBoost = POWER_BOOST;
 
   var maxBallSpeed = powerBoost * MAX_POWER_INIT;
 
@@ -211,7 +211,7 @@ export default function() {
         if (circleCollide(ballArray[i].x, ballArray[i].y, ballArray[i].radius, ballArray[j].x, ballArray[j].y, ballArray[j].radius)) {
           // Reset ball position to avoid mixing it with another ball's position. Avoid overlapping.
           collisionAngle = angleBetween2Lines(ballArray[i].x, ballArray[i].y, ballArray[j].x, ballArray[j].y, ballArray[i].x, ballArray[i].y, ballArray[i].x+25, ballArray[i].y);
-          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius - 1);
+          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius);
           ballArray[j].x = newCoordinates.x;
           ballArray[j].y = newCoordinates.y;
 
@@ -219,8 +219,7 @@ export default function() {
 
           [ballArray[i].angle, ballArray[j].angle] = [ballArray[j].angle, ballArray[i].angle];
 
-          let gain = Math.max(ballArray[i].v, ballArray[j].v) / maxBallSpeed;
-          sounds.play("ballCollisionHit", { "gain" : gain });
+          sounds.play("ballToBallCollisionHit", { "gain" : calculateSoundGainForBallCollision(Math.max(ballArray[i].v, ballArray[j].v)) });
         }
       }
     }

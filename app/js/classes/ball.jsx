@@ -1,6 +1,8 @@
 import { calcDistanceToMove, generateUUID } from '../math-utils';
 import { GRAVITY_ACCELERATION } from '../constants';
 import GraphicBall from './graphic-ball';
+import sounds from '../sounds';
+import { calculateSoundGainForBallCollision } from '../framework-functions';
 
 export default class Ball extends GraphicBall {
 
@@ -16,6 +18,10 @@ export default class Ball extends GraphicBall {
     this.newParams = {};
     this.slingColor = slingColor;
     this.uuid = generateUUID();
+  }
+
+  collisionSound() {
+    sounds.play("ballCollisionHit", { "gain" : calculateSoundGainForBallCollision(this.v) });
   }
 
   resetPosition(x, y) {
@@ -99,11 +105,26 @@ export default class Ball extends GraphicBall {
     var incX = this.vX();
     var incY = this.vY();
 
-   this.x += calcDistanceToMove(delta, incX);
-   this.y += calcDistanceToMove(delta, incY);
+    this.x += calcDistanceToMove(delta, incX);
+    this.y += calcDistanceToMove(delta, incY);
+  }
+
+  smallestCollisionAngle(surfaceAngle) {
+    let smallestAngle = Math.abs(Math.atan2(Math.sin(surfaceAngle-this.currentAngle()), Math.cos(surfaceAngle-this.currentAngle())));
+    smallestAngle = (smallestAngle > (Math.PI / 2) ? Math.abs(Math.PI - smallestAngle) : smallestAngle);
+    return smallestAngle;
+  }
+
+  playCollisonSoundForAngle(surfaceAngle) {
+    // if collision angle is more than 5 degrees (empyrical value)
+    if (this.smallestCollisionAngle(surfaceAngle) > (5 * (Math.PI/180)) ) {
+      this.collisionSound();
+    }
   }
 
   collisionReset(surfaceAngle) {
+    this.playCollisonSoundForAngle(surfaceAngle);
+
     var frictionReduction = 0.01; // ball rolls, velocity reduction factor per collision
     var speedCollisionReduction = 0.1; // ball hits velocity reduction factor per collision
     // TODO use speed this formula too http://stackoverflow.com/questions/9424459/calculate-velocity-and-direction-of-a-ball-to-ball-collision-based-on-mass-and-b
@@ -111,14 +132,12 @@ export default class Ball extends GraphicBall {
     // v -  coefficient * v * angleCoefficient
     // v * (1 - coefficient * angleCoefficient)
 
-
     this.runTime = 0;
     this.angle = this.currentAngle();
     this.hitAngle = this.angle;
     this.hitVelocity = this.v;
 
-    var smallestAngle = Math.abs(Math.atan2(Math.sin(surfaceAngle-this.hitAngle), Math.cos(surfaceAngle-this.hitAngle)));
-    smallestAngle = (smallestAngle > (Math.PI / 2) ? Math.abs(Math.PI - smallestAngle) : smallestAngle);
+    let smallestAngle = this.smallestCollisionAngle(surfaceAngle);
 
     this.hits.push({
       angleBetween: smallestAngle,
