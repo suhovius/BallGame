@@ -15,7 +15,7 @@ import ScorePoint from './classes/score-point';
 import MenuButton from './classes/menu-button';
 import Menu from './classes/menu';
 import Level from './classes/level';
-import { GAME_AREA_BORDER } from './constants';
+import { GAME_AREA_BORDER, MAX_POWER_INIT } from './constants';
 import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles } from './framework-functions';
 import sounds from './sounds';
 
@@ -33,6 +33,8 @@ export default function() {
   var delta, oldTime = 0;
 
   var powerBoost = 5;
+
+  var maxBallSpeed = powerBoost * MAX_POWER_INIT;
 
   // vars for handling inputs
   var inputStates = {};
@@ -209,16 +211,16 @@ export default function() {
         if (circleCollide(ballArray[i].x, ballArray[i].y, ballArray[i].radius, ballArray[j].x, ballArray[j].y, ballArray[j].radius)) {
           // Reset ball position to avoid mixing it with another ball's position. Avoid overlapping.
           collisionAngle = angleBetween2Lines(ballArray[i].x, ballArray[i].y, ballArray[j].x, ballArray[j].y, ballArray[i].x, ballArray[i].y, ballArray[i].x+25, ballArray[i].y);
-          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius);
+          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius - 1);
           ballArray[j].x = newCoordinates.x;
           ballArray[j].y = newCoordinates.y;
 
           [ballArray[i].v, ballArray[j].v] = [ballArray[j].v, ballArray[i].v];
 
           [ballArray[i].angle, ballArray[j].angle] = [ballArray[j].angle, ballArray[i].angle];
-          if (ballArray[i].v > 3 || ballArray[j].v > 3) {
-            sounds.play("ballCollisionHit");
-          }
+
+          let gain = Math.max(ballArray[i].v, ballArray[j].v) / maxBallSpeed;
+          sounds.play("ballCollisionHit", { "gain" : gain });
         }
       }
     }

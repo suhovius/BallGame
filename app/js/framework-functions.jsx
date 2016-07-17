@@ -1,4 +1,4 @@
-import { GAME_AREA_BORDER } from './constants';
+import { GAME_AREA_BORDER, MAX_POWER_INIT } from './constants';
 
 import { circleCollide } from './collision-detection';
 import { distanceBettweenToPoints, angleBetween2Lines } from './math-utils';
@@ -64,8 +64,8 @@ function checkBallControllable(ball, player, inputStates, powerBoost, ctx) {
     if(inputStates.mousedown) {
 
       var powerInit = distanceBettweenToPoints(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y);
-      if (powerInit > 100) {
-        powerInit = 100;
+      if (powerInit > MAX_POWER_INIT) {
+        powerInit = MAX_POWER_INIT;
       }
       var angle = angleBetween2Lines(ball.x, ball.y, inputStates.mousePos.x, inputStates.mousePos.y, ball.x, ball.y, ball.x + 25, ball.y);
 

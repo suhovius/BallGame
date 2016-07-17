@@ -7,12 +7,24 @@ export default class AudioPlayer {
     this._loadBuffer();
   }
 
-  play() {
-    let bufferSource = this.audioCtx.createBufferSource();
+  play(options={}) {
     if (this.buffer instanceof AudioBuffer) {
-      bufferSource.buffer = this.buffer;
-      bufferSource.connect(this.audioCtx.destination);
-      bufferSource.start();
+       // build graph source -> gain -> compressor -> speakers
+       let sourceNode = this.audioCtx.createBufferSource();
+       let compressorNode = this.audioCtx.createDynamicsCompressor();
+       let gainNode = this.audioCtx.createGain();
+
+       if (typeof options["gain"] != 'undefined') {
+         gainNode.gain.value = options["gain"];
+       } else {
+         gainNode.gain.value = 1;
+       }
+
+       sourceNode.buffer = this.buffer;
+       sourceNode.connect(gainNode);
+       gainNode.connect(compressorNode);
+       compressorNode.connect(this.audioCtx.destination);
+       sourceNode.start();
     }
   }
 
