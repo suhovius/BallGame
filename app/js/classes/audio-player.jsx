@@ -1,3 +1,5 @@
+import { getAudioContext } from '../global-audio-context';
+
 export default class AudioPlayer {
 
   constructor(url, options={}) {
@@ -8,16 +10,15 @@ export default class AudioPlayer {
       this.gainCoefficient = 1;
     }
 
-    this.audioCtx = new (window.AudioContext || window.webkitAudioContext);
     this._loadBuffer();
   }
 
   play(options={}) {
     if (this.buffer instanceof AudioBuffer) {
        // build graph source -> gain -> compressor -> speakers
-       let sourceNode = this.audioCtx.createBufferSource();
-       let compressorNode = this.audioCtx.createDynamicsCompressor();
-       let gainNode = this.audioCtx.createGain();
+       let sourceNode = getAudioContext().createBufferSource();
+       let compressorNode = getAudioContext().createDynamicsCompressor();
+       let gainNode = getAudioContext().createGain();
 
        let gain = 1;
        if (typeof options["gain"] != 'undefined') {
@@ -29,7 +30,7 @@ export default class AudioPlayer {
        sourceNode.buffer = this.buffer;
        sourceNode.connect(gainNode);
        gainNode.connect(compressorNode);
-       compressorNode.connect(this.audioCtx.destination);
+       compressorNode.connect(getAudioContext().destination);
        sourceNode.start();
     }
   }
@@ -47,7 +48,7 @@ export default class AudioPlayer {
 
     request.onload = function() {
       // Asynchronously decode the audio file data in request.response
-      audioPlayer.audioCtx.decodeAudioData(
+      getAudioContext().decodeAudioData(
         request.response,
         function(buffer) {
           console.log("Loaded and decoded track " + audioPlayer.url);

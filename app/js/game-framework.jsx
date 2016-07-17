@@ -258,6 +258,7 @@ export default function() {
       if (distanceBettweenToPoints(gatesArray[i].x, gatesArray[i].y, ball.x, ball.y) < 5) {
         // Gate hit detected
         if ((gatesArray[i].type === "finish") && (ball instanceof PlayerBall) ) {
+          sounds.play("levelComplete");
           currentGameState = gameStates.nextLevelMenu;
         }
       }
