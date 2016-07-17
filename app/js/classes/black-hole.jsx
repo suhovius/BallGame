@@ -51,6 +51,12 @@ export default class BlackHole extends Graphical {
 
     ctx.fill();
 
+    if (this.contentsToCollapseNumber) {
+      ctx.fillStyle = hex2rgb('#F5F6CE', 0.5);
+      ctx.font = "12px Arial";
+      ctx.fillText(this.contents.length + " / " + this.contentsToCollapseNumber,this.x+this.radius/2,this.y+this.radius/2);
+    }
+
     ctx.restore();
     this.drawContents(delta);
   }
