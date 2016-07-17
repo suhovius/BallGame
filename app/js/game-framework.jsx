@@ -17,6 +17,7 @@ import Menu from './classes/menu';
 import Level from './classes/level';
 import { GAME_AREA_BORDER } from './constants';
 import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles } from './framework-functions';
+import sounds from './sounds';
 
 export default function() {
   // Vars relative to the canvas
@@ -208,13 +209,16 @@ export default function() {
         if (circleCollide(ballArray[i].x, ballArray[i].y, ballArray[i].radius, ballArray[j].x, ballArray[j].y, ballArray[j].radius)) {
           // Reset ball position to avoid mixing it with another ball's position. Avoid overlapping.
           collisionAngle = angleBetween2Lines(ballArray[i].x, ballArray[i].y, ballArray[j].x, ballArray[j].y, ballArray[i].x, ballArray[i].y, ballArray[i].x+25, ballArray[i].y);
-          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius - 1); // Here is - 1 to make it move more smoother when speed is almost zero
+          newCoordinates = findNewPointBy(ballArray[i].x, ballArray[i].y, collisionAngle, ballArray[i].radius + ballArray[j].radius);
           ballArray[j].x = newCoordinates.x;
           ballArray[j].y = newCoordinates.y;
 
           [ballArray[i].v, ballArray[j].v] = [ballArray[j].v, ballArray[i].v];
 
           [ballArray[i].angle, ballArray[j].angle] = [ballArray[j].angle, ballArray[i].angle];
+          if (ballArray[i].v > 3 || ballArray[j].v > 3) {
+            sounds.play("ballCollisionHit");
+          }
         }
       }
     }
@@ -270,6 +274,7 @@ export default function() {
         ball.isAlive = false;
         ballArray = removeBallFromArray(ballArray, ball);
         blackHolesArray[i].setBallInside(ball);
+        sounds.play("lostInBlackHole");
         if (ball instanceof PlayerBall) {
           playerStats.balls--;
           if (playerStats.balls > 0) {

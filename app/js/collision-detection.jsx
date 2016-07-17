@@ -1,5 +1,5 @@
 import { dotLineLength } from './math-utils';
-
+import sounds from './sounds';
 
 function circleCollide(x1, y1, r1, x2, y2, r2) {
   var dx = x1 - x2;
@@ -169,8 +169,12 @@ function testCollisionWithBricks(bricksArray, ball) {
   let removeAtIndexes = [];
   for (var i = 0; i < bricksArray.length; i ++) {
     if (circRectsOverlap(bricksArray[i].x, bricksArray[i].y, bricksArray[i].width, bricksArray[i].height, ball.x, ball.y, ball.radius)) {
+      if (ball.v > 3) {
+        sounds.play("ballCollisionHit");
+      }
       if (bricksArray[i].constructor.name == "BreakableBrick") {
         removeAtIndexes.push(i);
+        sounds.play("breakableBrickHit");
       }
       resetBallAfterBrickCollision(ball, bricksArray[i]);
     }
@@ -184,6 +188,7 @@ function testCollisionWithScorePoints(scorePointsArray, ball) {
   for (var i = 0; i < scorePointsArray.length; i ++) {
     if (circleCollide(scorePointsArray[i].x, scorePointsArray[i].y, scorePointsArray[i].radius, ball.x, ball.y, ball.radius)) {
       removeAtIndexes.push(i);
+      sounds.play("scorePointHit");
     }
   }
 
