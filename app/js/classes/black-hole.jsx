@@ -13,14 +13,28 @@ export default class BlackHole extends Graphical {
     this.initialRadius = this.radius;
     this.status = "active";
     this.contents = [];
-    this.contentsToCollapseNumber = contentsToCollapseNumber
+    this.contentsToCollapseNumber = contentsToCollapseNumber;
   }
 
   collapseRate() {
     return this.radius / this.initialRadius;
   }
 
+  calculateNewCollapseRadius() {
+    if (!!this.contentsToCollapseNumber) {
+      if (this.contentsToCollapseNumber >= this.contents.length) {
+        return Math.floor((1 - this.contents.length / this.contentsToCollapseNumber) * this.initialRadius);
+      } else {
+        return 0;
+      }
+    }
+  }
+
   draw(delta) {
+    if (this.isCollapsing()) {
+      this.collapse(delta);
+    }
+
     let ctx = this.context();
     ctx.save();
     ctx.beginPath();
@@ -88,7 +102,7 @@ export default class BlackHole extends Graphical {
   }
 
   shouldCollapse() {
-    return this.contentsToCollapseNumber <= this.contents.length;
+    return this.contents.length > 0;
   }
 
 
@@ -102,9 +116,12 @@ export default class BlackHole extends Graphical {
 
   collapse(delta) {
     if (this.radius > 3 && this.status == "collapse") {
-      this.radius = this.radius - 0.01 * delta;
+      let newRadius = this.calculateNewCollapseRadius();
+      if (this.radius > newRadius) {
+        this.radius = this.radius - 0.01 * delta;
+      }
     } else {
-      this.status = "disappeared"
+        this.status = "disappeared"
     }
   }
 

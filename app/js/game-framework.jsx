@@ -392,7 +392,7 @@ export default function() {
     scorePointsArray = currentLevel.loadScorePoints();
     var startGate = getStartGate(gatesArray);
     createPlayerBall(startGate.x, startGate.y);
-    createBalls(1);
+    createBalls(3);
     playerStats["levels"][currentLevel.number] = {
       "score_points" : [],
       "totalScore" : 0
