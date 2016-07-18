@@ -17,9 +17,13 @@ import Menu from './classes/menu';
 import Level from './classes/level';
 import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST } from './constants';
 import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles, calculateSoundGainForBallCollision } from './framework-functions';
+import { getAudioContext } from './global-audio-context';
 import sounds from './sounds';
 
 export default function() {
+
+  var musicPlayer = sounds.play("musicFast");
+
   // Vars relative to the canvas
   var canvas, ctx, w, h;
 

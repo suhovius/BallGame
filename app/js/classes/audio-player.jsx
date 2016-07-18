@@ -4,35 +4,54 @@ export default class AudioPlayer {
 
   constructor(url, options={}) {
     this.url = url;
-    if (typeof options["gainCoefficient"] != 'undefined') {
-      this.gainCoefficient = options["gainCoefficient"];
-    } else {
-      this.gainCoefficient = 1;
-    }
+
+    this.gainCoefficient = options["gainCoefficient"] || 1;
+
+    this.loop = options["loop"] || false;
 
     this._loadBuffer();
+
+  }
+
+  isLoaded() {
+    return this.buffer instanceof AudioBuffer;
   }
 
   play(options={}) {
-    if (this.buffer instanceof AudioBuffer) {
-       // build graph source -> gain -> compressor -> speakers
-       let sourceNode = getAudioContext().createBufferSource();
-       let compressorNode = getAudioContext().createDynamicsCompressor();
-       let gainNode = getAudioContext().createGain();
-
-       let gain = 1;
-       if (typeof options["gain"] != 'undefined') {
-         gain = options["gain"];
-       }
-
-       gainNode.gain.value = gain * this.gainCoefficient;
-
-       sourceNode.buffer = this.buffer;
-       sourceNode.connect(gainNode);
-       gainNode.connect(compressorNode);
-       compressorNode.connect(getAudioContext().destination);
-       sourceNode.start();
+    if (this.isLoaded()) {
+      this._playSound(options);
+    } else {
+      this.waitToPlayWithOptions = options;
     }
+  }
+
+  stop() {
+    if (this.isLoaded) {
+      this.sourceNode.stop();
+    }
+  }
+
+  _playSound(options={}) {
+    // build graph source -> gain -> compressor -> speakers
+    let sourceNode = getAudioContext().createBufferSource();
+    this.sourceNode = sourceNode;
+    sourceNode.loop = this.loop;
+    let compressorNode = getAudioContext().createDynamicsCompressor();
+    let gainNode = getAudioContext().createGain();
+
+    let gain = 1;
+    if (typeof options["gain"] != 'undefined') {
+      gain = options["gain"];
+    }
+
+    gainNode.gain.value = gain * this.gainCoefficient;
+
+    sourceNode.buffer = this.buffer;
+    sourceNode.connect(gainNode);
+    gainNode.connect(compressorNode);
+    compressorNode.connect(getAudioContext().destination);
+
+    sourceNode.start();
   }
 
   _loadBuffer() {
@@ -58,6 +77,9 @@ export default class AudioPlayer {
           }
 
           audioPlayer.buffer = buffer;
+          if (audioPlayer.waitToPlayWithOptions) {
+            audioPlayer._playSound(audioPlayer.waitToPlayWithOptions);
+          }
         },
         function(error) {
           console.error('decodeAudioData error', error);
