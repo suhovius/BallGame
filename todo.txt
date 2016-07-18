@@ -1,8 +1,0 @@
-TODO:
-
-Output somewhere in html all ball telemetry data: speed, angle, position, etc,
-Output canvas size and mouse position also
-Detect angle from drawed line
-
-Examples
-http://jsbin.com/wedupi/1/edit?js,output
