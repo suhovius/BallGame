@@ -2,6 +2,7 @@ import Constants from '../constants';
 import Graphical from './graphical';
 import { hex2rgb, calcDistanceToMove, moveFromToLocationOffsetsXY } from '../math-utils'
 import GraphicBall from './graphic-ball';
+import sounds from '../sounds';
 
 export default class BlackHole extends Graphical {
 
@@ -127,6 +128,7 @@ export default class BlackHole extends Graphical {
         this.radius = this.radius - 0.01 * delta;
       }
     } else {
+        sounds.play("blackHoleDisappear");
         this.status = "disappeared"
     }
   }
