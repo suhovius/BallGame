@@ -10,6 +10,7 @@ export default {
     "levelComplete": new AudioPlayer("audio/sounds/337049__shinephoenixstormcrow__320655-rhodesmas-level-up-01.mp3"),
     "musicSlow": new AudioPlayer("audio/music/211413__zagi2__metal-loop-2.wav", { loop: true }),
     "musicFast": new AudioPlayer("audio/music/173918__zagi2__metal-loop.wav", { loop: true }),
+    "gameSoundtrack": new AudioPlayer("audio/music/ball_game_ost.mp3", { loop: true , gainCoefficient: 0.5}),
     "blackHoleDisappear": new AudioPlayer("audio/sounds/162461__kastenfrosch__bordtransmitter.mp3", { gainCoefficient: 2}),
   },
   play(soundName, options = {}) {

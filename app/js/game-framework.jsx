@@ -22,7 +22,7 @@ import sounds from './sounds';
 
 export default function() {
 
-  var musicPlayer = sounds.play("musicFast");
+  var musicPlayer = sounds.play("gameSoundtrack");
 
   // Vars relative to the canvas
   var canvas, ctx, w, h;
