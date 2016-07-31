@@ -19,10 +19,11 @@ import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST } from './constants';
 import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles, calculateSoundGainForBallCollision } from './framework-functions';
 import { getAudioContext } from './global-audio-context';
 import sounds from './sounds';
+import settings from './game-settings';
 
 export default function() {
 
-  var musicPlayer = sounds.play("gameSoundtrack");
+  var musicPlayer = sounds.play("gameSoundtrack", {}, "music");
 
   // Vars relative to the canvas
   var canvas, ctx, w, h;
@@ -155,6 +156,15 @@ export default function() {
       musicPlayer.play();
     }
     this.text = musicButtonText(musicPlayer);
+  });
+
+  function soundsButtonText(settings) {
+    return "Sounds: " + (settings.read().areSoundsOn ? "On" : "Off");
+  }
+
+  mainMenu.addButton(soundsButtonText(settings), function() {
+    settings.toggleBoolean("areSoundsOn");
+    this.text = soundsButtonText(settings);
   });
 
   var currentGameState = gameStates.mainMenu;
