@@ -36,6 +36,8 @@ export default function() {
   // for time based animation
   var delta, oldTime = 0;
 
+  var isLevelLoaded = false;
+
   var powerBoost = POWER_BOOST;
 
   var maxBallSpeed = powerBoost * MAX_POWER_INIT;
@@ -119,14 +121,14 @@ export default function() {
 
   var mainMenu = new Menu("Main Menu");
 
+  mainMenu.addButton("Return to Game", function() {
+    currentGameState = gameStates.gameRunning;
+  }, false);
+
   mainMenu.addButton("Start New Game", function() {
     currentLevel = new Level(1);
     playerStats = Object.assign(playerStats, PLAYER_STATS_INIT);
     startGame();
-  });
-
-  mainMenu.addButton("Return to Game", function() {
-    currentGameState = gameStates.gameRunning;
   });
 
   function musicButtonText(musicPlayer) {
@@ -426,7 +428,6 @@ export default function() {
 
   // TODO This should load current level and start game.
   function startGame() {
-    console.log("Game Started");
     ballArray = currentLevel.loadBalls();
     bricksArray = currentLevel.loadBricks();
     gatesArray = currentLevel.loadGates();
@@ -439,6 +440,7 @@ export default function() {
       "totalScore" : 0
     }
     currentGameState = gameStates.gameRunning;
+    isLevelLoaded = true;
   }
 
   var start = function(){

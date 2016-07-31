@@ -2,7 +2,7 @@ import Graphical from './graphical';
 import { circRectsOverlap } from '../collision-detection';
 
 export default class MenuButton extends Graphical {
-  constructor(x, y, w, h, text) {
+  constructor(x, y, w, h, text, isVisible = true) {
     super();
     this.x = x;
     this.y = y;
@@ -10,10 +10,16 @@ export default class MenuButton extends Graphical {
     this.w = w;
     this.h = h;
     this.state = "released"; // 'clicked', 'released'
+    this.isVisible = isVisible;
   }
 
   fontSize() {
-    return (35 * this.h) / 50;
+    return (7 * this.h) / 10;
+  }
+
+  updatePosition(x, y) {
+    this.x = x;
+    this.y = y;
   }
 
   draw() {

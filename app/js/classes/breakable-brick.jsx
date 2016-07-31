@@ -16,7 +16,7 @@ export default class BreakableBrick extends Brick {
 
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fill();
-    ctx.strokeStyle = '#00ffcc';
+    ctx.strokeStyle = '#a9c3f0';
     ctx.strokeRect(this.x, this.y, this.width, this.height);
     ctx.restore();
   }

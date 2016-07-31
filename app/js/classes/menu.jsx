@@ -5,18 +5,29 @@ import { GAME_AREA_BORDER } from '../constants';
 
 export default class Menu extends Graphical {
 
-  constructor(title) {
+  constructor(title, xOffset, yOffset, buttonSpacing=3) {
     super();
     this.title = title;
     this.buttons = [];
+    let w = this.canvas().width;
+    this.xOffset = w/2 - 195;
+    this.yOffset = GAME_AREA_BORDER + 55;
+    this.buttonSpacing = buttonSpacing;
   }
 
-  addButton(title, clickHandler) {
-    let w = this.canvas().width;
-    let button = new MenuButton(w/2 - 195, GAME_AREA_BORDER + 55 + (53 * this.buttons.length), 390, 50, title);
+  addButton(title, clickHandler, isVisible=true, width = 390, height = 50) {
+    let button = new MenuButton(...this._buttonCoordinatesByIndex(height, this.buttons.length), width, height, title, isVisible);
     button.releaseHandler = clickHandler;
     this.buttons.push(button);
     return button;
+  }
+
+  _buttonCoordinatesByIndex(height, index) {
+    return [this.xOffset,(this.yOffset + ((this.buttonSpacing + height) * index))]
+  }
+
+  visibleButtons() {
+    return this.buttons.filter(function(button) { return button.isVisible; });
   }
 
   // TODO player and inputStates should be imported as singleton objects
@@ -34,22 +45,14 @@ export default class Menu extends Graphical {
     ctx.stroke();
     ctx.restore();
 
+    let visibleBtns = this.visibleButtons();
 
-    for(var i=0; i < this.buttons.length; i++) {
-      this.buttons[i].draw();
+    for(var i=0; i < visibleBtns.length; i++) {
+      // update button position
+      visibleBtns[i].updatePosition(...this._buttonCoordinatesByIndex(visibleBtns[i].h, i));
+      visibleBtns[i].draw();
       // Draw button that was selected by user
-      this.buttons[i].processCursor(player, inputStates);
-      // if ((player.x && player.y) && circRectsOverlap(this.buttons[i].x, this.buttons[i].y, this.buttons[i].w, this.buttons[i].h, player.x, player.y, 1)) {
-      //   this.buttons[i].drawSelection();
-
-      //   if (inputStates.mouseDownPos && (inputStates.mouseDownPos.x == player.x && inputStates.mouseDownPos.y == player.y)) {
-      //     this.buttons[i].click();
-      //   }
-
-      //   if (inputStates.mouseUpPos && (inputStates.mouseUpPos.x == player.x && inputStates.mouseUpPos.y == player.y)) {
-      //     this.buttons[i].release();
-      //   }
-      // }
+      visibleBtns[i].processCursor(player, inputStates);
     }
   }
 }
