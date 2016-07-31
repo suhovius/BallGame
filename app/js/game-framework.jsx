@@ -112,7 +112,10 @@ export default function() {
 
   var gameAreaBorder = GAME_AREA_BORDER;
 
-  var mainMenuButton = new MenuButton(300, 400, 50, 30, "Menu");
+  var mainMenuButton = new MenuButton(300, 20, 80, 40, "Menu");
+  mainMenuButton.releaseHandler = function() {
+    currentGameState = gameStates.mainMenu;
+  }
 
   var mainMenu = new Menu("Main Menu");
 
@@ -130,13 +133,13 @@ export default function() {
     return "Music: " + (musicPlayer.status == "playing" ? "On" : "Off");
   }
 
-  mainMenu.addButton(musicButtonText(musicPlayer), function(button) {
+  mainMenu.addButton(musicButtonText(musicPlayer), function() {
     if (musicPlayer.status == "playing") {
       musicPlayer.stop();
     } else {
       musicPlayer.play();
     }
-    button.text = musicButtonText(musicPlayer);
+    this.text = musicButtonText(musicPlayer);
   });
 
   var nextLevelMenu = new Menu("Level Complete!");
@@ -325,6 +328,7 @@ export default function() {
 
   function updateMainMenuButton(mainMenuButton) {
     mainMenuButton.draw();
+    mainMenuButton.processCursor(player, inputStates);
   }
 
   function timer(currentTime) {

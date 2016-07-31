@@ -1,4 +1,5 @@
 import Graphical from './graphical';
+import { circRectsOverlap } from '../collision-detection';
 
 export default class MenuButton extends Graphical {
   constructor(x, y, w, h, text) {
@@ -11,6 +12,10 @@ export default class MenuButton extends Graphical {
     this.state = "released"; // 'clicked', 'released'
   }
 
+  fontSize() {
+    return (35 * this.h) / 50;
+  }
+
   draw() {
     let ctx = this.context();
     ctx.save();
@@ -21,9 +26,8 @@ export default class MenuButton extends Graphical {
     ctx.fill();
 
     ctx.fillStyle="#C8C8C8";
-    let fontSize = (35 * this.h) / 50;
-    ctx.font = fontSize + "px Arial";
-    ctx.fillText(this.text, this.x+5, this.y+fontSize);
+    ctx.font = this.fontSize() + "px Arial";
+    ctx.fillText(this.text, this.x+5, this.y+this.fontSize());
     ctx.restore();
   }
 
@@ -32,14 +36,28 @@ export default class MenuButton extends Graphical {
     ctx.save();
     ctx.beginPath();
 
-    ctx.rect(this.x, this.y, 390, 50);
+    ctx.rect(this.x, this.y, this.w, this.h);
     ctx.fillStyle = 'rgba(0, 255, 0 , 0.1)';
     ctx.fill();
 
     ctx.fillStyle="#33CC33";
-    ctx.font = "35px Arial";
-    ctx.fillText(this.text, this.x+5, this.y+35);
+    ctx.font = this.fontSize() + "px Arial";
+    ctx.fillText(this.text, this.x+5, this.y+this.fontSize() );
     ctx.restore();
+  }
+
+  processCursor(player, inputStates) {
+    if ((player.x && player.y) && circRectsOverlap(this.x, this.y, this.w, this.h, player.x, player.y, 1)) {
+      this.drawSelection();
+
+      if (inputStates.mouseDownPos && (inputStates.mouseDownPos.x == player.x && inputStates.mouseDownPos.y == player.y)) {
+        this.click();
+      }
+
+      if (inputStates.mouseUpPos && (inputStates.mouseUpPos.x == player.x && inputStates.mouseUpPos.y == player.y)) {
+        this.release();
+      }
+    }
   }
 
   click() {
