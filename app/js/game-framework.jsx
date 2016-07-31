@@ -107,10 +107,37 @@ export default function() {
       frozenDebug: 4
   };
   // var currentGameState = gameStates.gameRunning;
-  var currentGameState = gameStates.nextLevelMenu;
+  // var currentGameState = gameStates.mainMenu;
   var currentLevel = new Level(1);
 
   var gameAreaBorder = GAME_AREA_BORDER;
+
+  var mainMenuButton = new MenuButton(300, 400, 50, 30, "Menu");
+
+  var mainMenu = new Menu("Main Menu");
+
+  mainMenu.addButton("Start New Game", function() {
+    currentLevel = new Level(1);
+    playerStats = Object.assign(playerStats, PLAYER_STATS_INIT);
+    startGame();
+  });
+
+  mainMenu.addButton("Return to Game", function() {
+    currentGameState = gameStates.gameRunning;
+  });
+
+  function musicButtonText(musicPlayer) {
+    return "Music: " + (musicPlayer.status == "playing" ? "On" : "Off");
+  }
+
+  mainMenu.addButton(musicButtonText(musicPlayer), function(button) {
+    if (musicPlayer.status == "playing") {
+      musicPlayer.stop();
+    } else {
+      musicPlayer.play();
+    }
+    button.text = musicButtonText(musicPlayer);
+  });
 
   var nextLevelMenu = new Menu("Level Complete!");
   nextLevelMenu.addButton("Start Next Level", function() {
@@ -133,6 +160,8 @@ export default function() {
       startGame();
     }
   });
+
+  var currentGameState = gameStates.mainMenu;
 
   var measureFPS = function(newTime){
 
@@ -294,6 +323,10 @@ export default function() {
     }
   }
 
+  function updateMainMenuButton(mainMenuButton) {
+    mainMenuButton.draw();
+  }
+
   function timer(currentTime) {
     var delta = currentTime - oldTime;
     oldTime = currentTime;
@@ -330,14 +363,17 @@ export default function() {
 
           updateStats();
 
+          updateMainMenuButton(mainMenuButton);
+
           // drawAxis(ctx, w, h, w/2, h/2, ballArray[0].hitAngle, 200);
           // drawAxis(ctx, w, h, w/2, h/2, 235 * (Math.PI / 180), 200);
 
           // updateTelemetry(telemetryContainer, ballArray[0]);
           // drawCollisionAngles(ctx, w, h, ballArray[0]);
-
+          break;
         case gameStates.mainMenu:
           // TODO Add UI menu
+          mainMenu.draw(player, inputStates);
           break;
         case gameStates.nextLevelMenu:
           nextLevelMenu.title = "Level " + (currentLevel.number) + " Complete!";
@@ -386,6 +422,7 @@ export default function() {
 
   // TODO This should load current level and start game.
   function startGame() {
+    console.log("Game Started");
     ballArray = currentLevel.loadBalls();
     bricksArray = currentLevel.loadBricks();
     gatesArray = currentLevel.loadGates();
@@ -469,8 +506,6 @@ export default function() {
       inputStates.mouseDownPos = null; // clean mouse down position
       inputStates.mouseUpPos = getMousePos(evt);
     }, false);
-
-    startGame();
 
     requestAnimationFrame(mainLoop);
 

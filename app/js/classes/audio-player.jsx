@@ -11,6 +11,8 @@ export default class AudioPlayer {
 
     this._loadBuffer();
 
+    this.status = "stopped";
+
   }
 
   isLoaded() {
@@ -23,12 +25,14 @@ export default class AudioPlayer {
     } else {
       this.waitToPlayWithOptions = options;
     }
+    this.status = "playing";
   }
 
   stop() {
     if (this.isLoaded) {
-      this.sourceNode.stop();
+      this.sourceNode && this.sourceNode.stop();
     }
+    this.status = "stopped";
   }
 
   _playSound(options={}) {

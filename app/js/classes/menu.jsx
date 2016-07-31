@@ -15,7 +15,7 @@ export default class Menu extends Graphical {
   addButton(title, clickHandler) {
     let w = this.canvas().width;
     let button = new MenuButton(w/2 - 195, GAME_AREA_BORDER + 55 + (53 * this.buttons.length), 390, 50, title);
-    button.releaseHandler = clickHandler
+    button.releaseHandler = clickHandler(button);
     this.buttons.push(button);
     return button;
   }

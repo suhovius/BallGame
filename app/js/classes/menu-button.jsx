@@ -21,8 +21,9 @@ export default class MenuButton extends Graphical {
     ctx.fill();
 
     ctx.fillStyle="#C8C8C8";
-    ctx.font = "35px Arial";
-    ctx.fillText(this.text, this.x+5, this.y+35);
+    let fontSize = (35 * this.h) / 50;
+    ctx.font = fontSize + "px Arial";
+    ctx.fillText(this.text, this.x+5, this.y+fontSize);
     ctx.restore();
   }
 

@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/alexius/ballgame.git"
+    "url": "git+ssh://git@github.com:suhovius/BallGame.git"
   },
   "keywords": [
     "ball",
@@ -20,7 +20,7 @@
   ],
   "author": "Alexey Suhoviy",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/alexius/ballgame#readme",
+  "homepage": "https://github.com/suhovius/BallGame",
   "devDependencies": {
     "babel-core": "^6.8.0",
     "babel-loader": "^6.2.4",
