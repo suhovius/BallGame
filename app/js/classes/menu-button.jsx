@@ -1,5 +1,6 @@
 import Graphical from './graphical';
 import { circRectsOverlap } from '../collision-detection';
+import sounds from '../sounds';
 
 export default class MenuButton extends Graphical {
   constructor(x, y, w, h, text, isVisible = true) {
@@ -11,6 +12,8 @@ export default class MenuButton extends Graphical {
     this.h = h;
     this.state = "released"; // 'clicked', 'released'
     this.isVisible = isVisible;
+    this.isHover = false;
+    this.isHoverPrev = false;
   }
 
   fontSize() {
@@ -52,9 +55,18 @@ export default class MenuButton extends Graphical {
     ctx.restore();
   }
 
+  playCursorHoverSound() {
+    if (!this.hasPlayedHoverSound) {
+      this.hasPlayedHoverSound = true;
+      sounds.play("menuButtonCursorHover");
+    }
+  }
+
   processCursor(player, inputStates) {
     if ((player.x && player.y) && circRectsOverlap(this.x, this.y, this.w, this.h, player.x, player.y, 1)) {
       this.drawSelection();
+
+      this.playCursorHoverSound();
 
       if (inputStates.mouseDownPos && (inputStates.mouseDownPos.x == player.x && inputStates.mouseDownPos.y == player.y)) {
         this.click();
@@ -63,7 +75,10 @@ export default class MenuButton extends Graphical {
       if (inputStates.mouseUpPos && (inputStates.mouseUpPos.x == player.x && inputStates.mouseUpPos.y == player.y)) {
         this.release();
       }
+    } else {
+      this.hasPlayedHoverSound = false;
     }
+
   }
 
   click() {
