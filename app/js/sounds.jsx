@@ -13,16 +13,13 @@ export default {
     "gameOver": new AudioPlayer("audio/sounds/339837__rocotilos__8-bit-game-over.wav"),
     "menuButtonCursorHover": new AudioPlayer("audio/sounds/198448__callum-sharp279__menu-scroll-selection-sound.wav"),
   },
-  "music" : {
-    "gameSoundtrack": new AudioPlayer("audio/music/ball_game_ost.mp3", { loop: true , gainCoefficient: 0.5}),
-  },
-  play(soundName, options = {}, audioType="sounds") {
+  play(soundName, options = {}) {
     if (settings.read().areSoundsOn) {
-      this.getPlayerFor(soundName, audioType).play(options);
+      this.getPlayerFor(soundName).play(options);
     }
-    return this.getPlayerFor(soundName, audioType);
+    return this.getPlayerFor(soundName);
   },
-  getPlayerFor(soundName, audioType="sounds") {
-    return this[audioType][soundName];
+  getPlayerFor(soundName) {
+    return this.sounds[soundName];
   }
 }

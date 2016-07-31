@@ -18,12 +18,16 @@ import Level from './classes/level';
 import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST } from './constants';
 import { clearCanvas, updatePlayerCursor, updateGates, drawGameAreaBorder, checkBallControllable, updateBlackHoles, calculateSoundGainForBallCollision } from './framework-functions';
 import { getAudioContext } from './global-audio-context';
+import AudioPlayer from './classes/audio-player';
 import sounds from './sounds';
 import settings from './game-settings';
 
 export default function() {
 
-  var musicPlayer = sounds.play("gameSoundtrack", {}, "music");
+  // Move this to separete file as sounds but for music
+  // Especially if there will be some more music
+  var musicPlayer = new AudioPlayer("audio/music/ball_game_ost.mp3", { loop: true , gainCoefficient: 0.5});
+  musicPlayer.play();
 
   // Vars relative to the canvas
   var canvas, ctx, w, h;
