@@ -36,8 +36,6 @@ export default function() {
   // for time based animation
   var delta, oldTime = 0;
 
-  var isLevelLoaded = false;
-
   var powerBoost = POWER_BOOST;
 
   var maxBallSpeed = powerBoost * MAX_POWER_INIT;
@@ -104,7 +102,7 @@ export default function() {
   var gameStates = {
       mainMenu: 0,
       gameRunning: 1,
-      nextLevelMenu: 2,
+      levelComplete: 2,
       gameOver: 3,
       frozenDebug: 4
   };
@@ -121,14 +119,29 @@ export default function() {
 
   var mainMenu = new Menu("Main Menu");
 
-  mainMenu.addButton("Return to Game", function() {
+  var resumeGameButton = mainMenu.addButton("Resume Game", function() {
     currentGameState = gameStates.gameRunning;
   }, false);
 
-  mainMenu.addButton("Start New Game", function() {
-    currentLevel = new Level(1);
-    playerStats = Object.assign(playerStats, PLAYER_STATS_INIT);
+  var startNextLevelButton = mainMenu.addButton("Start Next Level", function() {
+    if (currentLevel.hasNextLevel()) {
+      currentLevel = currentLevel.getNextLevel();
+      startGame();
+    }
+  }, false);
+
+  var replayCurrentLevelButton = mainMenu.addButton("Replay Current Level", function() {
+    playerStats["levels"][currentLevel.number]["score_points"] = [];
+    playerStats.calculateTotalScore();
     startGame();
+  }, false);
+
+  mainMenu.addButton("Start New Game", function() {
+    if (currentLevel.hasNextLevel()) {
+      currentLevel = new Level(1);
+      playerStats = Object.assign(playerStats, PLAYER_STATS_INIT);
+      startGame();
+    }
   });
 
   function musicButtonText(musicPlayer) {
@@ -142,28 +155,6 @@ export default function() {
       musicPlayer.play();
     }
     this.text = musicButtonText(musicPlayer);
-  });
-
-  var nextLevelMenu = new Menu("Level Complete!");
-  nextLevelMenu.addButton("Start Next Level", function() {
-    if (currentLevel.hasNextLevel()) {
-      currentLevel = currentLevel.getNextLevel();
-      startGame();
-    }
-  });
-  nextLevelMenu.addButton("Replay Current Level", function() {
-    playerStats["levels"][currentLevel.number]["score_points"] = [];
-    playerStats.calculateTotalScore();
-    startGame();
-  });
-
-  var gameOverMenu = new Menu("GAME OVER!");
-  gameOverMenu.addButton("Restart Game", function() {
-    if (currentLevel.hasNextLevel()) {
-      currentLevel = currentLevel = new Level(1);
-      playerStats = Object.assign(playerStats, PLAYER_STATS_INIT);
-      startGame();
-    }
   });
 
   var currentGameState = gameStates.mainMenu;
@@ -297,7 +288,7 @@ export default function() {
         // Gate hit detected
         if ((gatesArray[i].type === "finish") && (ball instanceof PlayerBall) ) {
           sounds.play("levelComplete");
-          currentGameState = gameStates.nextLevelMenu;
+          currentGameState = gameStates.levelComplete;
         }
       }
     }
@@ -379,21 +370,24 @@ export default function() {
           break;
         case gameStates.mainMenu:
           // TODO Add UI menu
+          mainMenu.title = "Main Menu";
+          startNextLevelButton.isVisible = false;
+          replayCurrentLevelButton.isVisible = false;
           mainMenu.draw(player, inputStates);
           break;
-        case gameStates.nextLevelMenu:
-          nextLevelMenu.title = "Level " + (currentLevel.number) + " Complete!";
-          nextLevelMenu.draw(player, inputStates);
+        case gameStates.levelComplete:
+          mainMenu.title = "Level " + (currentLevel.number) + " Complete!";
+          startNextLevelButton.isVisible = true;
+          replayCurrentLevelButton.isVisible = true;
+          resumeGameButton.isVisible = false;
+          mainMenu.draw(player, inputStates);
           break;
         case gameStates.gameOver:
-          // ctx.save();
-          // ctx.beginPath();
-          // ctx.fillStyle="FF3333";
-          // ctx.font = "70px Arial";
-          // ctx.fillText("GAME OVER", 35, 70);
-          // ctx.restore();
-          gameOverMenu.draw(player, inputStates);
-          // TODO! Add more UI friendly information
+          mainMenu.title = "GAME OVER!";
+          startNextLevelButton.isVisible = false;
+          replayCurrentLevelButton.isVisible = false;
+          resumeGameButton.isVisible = false;
+          mainMenu.draw(player, inputStates);
           break;
       }
 
@@ -440,7 +434,7 @@ export default function() {
       "totalScore" : 0
     }
     currentGameState = gameStates.gameRunning;
-    isLevelLoaded = true;
+    resumeGameButton.isVisible = true;
   }
 
   var start = function(){
