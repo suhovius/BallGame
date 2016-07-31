@@ -9,7 +9,7 @@ export default {
     "lostInBlackHole": new AudioPlayer("audio/sounds/206138__robinhood76__04673-small-short-sucking-whoosh.wav"),
     "levelComplete": new AudioPlayer("audio/sounds/337049__shinephoenixstormcrow__320655-rhodesmas-level-up-01.mp3"),
     "blackHoleDisappear": new AudioPlayer("audio/sounds/162461__kastenfrosch__bordtransmitter.mp3", { gainCoefficient: 2}),
-    "gameOver": new AudioPlayer("audio/sounds/43696__notchfilter__game-over01.wav"),
+    "gameOver": new AudioPlayer("audio/sounds/339837__rocotilos__8-bit-game-over.wav"),
     "menuButtonCursorHover": new AudioPlayer("audio/sounds/198448__callum-sharp279__menu-scroll-selection-sound.wav"),
     "gameSoundtrack": new AudioPlayer("audio/music/ball_game_ost.mp3", { loop: true , gainCoefficient: 0.5}),
   },

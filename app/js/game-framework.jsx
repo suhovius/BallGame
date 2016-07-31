@@ -313,6 +313,7 @@ export default function() {
             createPlayerBall(startGate.x, startGate.y);
           } else {
             currentGameState = gameStates.gameOver;
+            sounds.play("gameOver");
           }
         }
       }
