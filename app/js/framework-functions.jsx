@@ -1,4 +1,4 @@
-import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST } from './constants';
+import { GAME_AREA_BORDER, MAX_POWER_INIT, POWER_BOOST, GAME_NAME } from './constants';
 
 import { circleCollide } from './collision-detection';
 import { distanceBettweenToPoints, angleBetween2Lines } from './math-utils';
@@ -58,6 +58,9 @@ function drawGameAreaBorder(ctx, canvas) {
   ctx.strokeStyle = "#383838";
   ctx.rect(GAME_AREA_BORDER,GAME_AREA_BORDER,w - 2*GAME_AREA_BORDER,h - 2*GAME_AREA_BORDER);
   ctx.stroke();
+  ctx.fillStyle = '#00cc44';
+  ctx.font = "25px Arial";
+  ctx.fillText(GAME_NAME, 30, h-30);
   ctx.restore();
 }
 
